@@ -1,10 +1,10 @@
 > ^^^Default Message^^^<!-- Delete this line + everything above when done. -->
 
-* **Author**: @dau501
+* **Author**: @corebenyo
 * **Issue**: #0
-* **Board**: Please see [SEPA Board](https://github.com/orgs/kanbanyte/projects/7?fullscreen=true).
+* **Board**: Please see [CTPA Board](https://github.com/orgs/elyithium/projects/3?fullscreen=true).
 * **Discussion**: #0
-* **Role**: @kanbanyte/sepagroup
+* **Role**: @elyithium/ctpagroup
 > ^^^Template Description^^^<!-- Delete this line when done. -->
 
 <!--
@@ -21,21 +21,21 @@ Remove all commented out lines + everything below when done.
 * **Default Message**:
 	- [ ] Remove the commit/merge description(s)
 * **Template Description**: Change the following...
-	- [ ] Author `@dau501` to your *username*.
+	- [ ] Author `@corebenyo` to your *username*.
 	- [ ] Issue `#0` to related issue *no*.
 	- [ ] Discussion `#0` to related discussion *no*.
-	- [ ] Role `@kanbanyte/sepagroup` to your *team*.\
+	- [ ] Role `@elyithium/ctpagroup` to your *team*.\
 	Valid Teams (Roles):
-		* @kanbanyte/sepaleader
-		* @kanbanyte/sepamanager
-		* @kanbanyte/sepaquality
-		* @kanbanyte/sepasupport
+		* @elyithium/ctpaleader
+		* @elyithium/ctpamanager
+		* @elyithium/ctpaquality
+		* @elyithium/ctpasupport
 <!-- Please only provide one from the listed teams. -->
 
 ### Right->:
 * **Reviewers**:
 	- [ ] Select a reviewer\
-	(if unsure @Slothman1 is the @kanbanyte/sepaleader or @dau501 the @kanbanyte/sepamanager by default)
+	(if unsure @Yashvi-gif is the @elyithium/ctpaleader or @corbenyo the @elyithium/ctpamanager by default)
 		* Alternatively you could select a team member with the same role as yourself.
 * **Assignees**:
 	- [ ] Assign yourself
