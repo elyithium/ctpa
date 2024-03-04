@@ -1,5 +1,6 @@
 # Software Engineering Project A Unit Outline
-> Kanban board to organise and manage repo: .
+> Kanban board to organise and manage repo: [CTPA BOARD](https://github.com/orgs/elyithium/projects/3).\
+> Milestones to track repo development: [CTPA Milestones](https://github.com/elyithium/ctpa/milestones).
 
 <!--
 	Course Syllabus
