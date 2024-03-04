@@ -5,8 +5,6 @@
 -->
 
 
-<!-- Above renders an image of the UR5e from UNIVERSAL ROBOTS and the "trays" of where the chips will be picked up from robot arm. -->
-
 ## PROJECT 24.
 ### Title:
 `Dynamic (Web) application security scanning tool`
