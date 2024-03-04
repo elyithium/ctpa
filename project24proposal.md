@@ -9,10 +9,10 @@
 
 ## PROJECT 24.
 ### Title:
-`Dynamic (Web) applicaƟon security scanning tool`
+`Dynamic (Web) application security scanning tool`
 
 ### Description:
-Design and create an automated applicaƟon that can crawl and scan/test for common web security /
+Design and create an automated application that can crawl and scan/test for common web security /
 vulnerabiliƟes of a live website and generate a security vulnerability report for the user.
 
 ### Skills:
