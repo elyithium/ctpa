@@ -1,0 +1,17 @@
+// src/scanners/XSSScanner.js
+const BaseScanner = require('./BaseScanner');
+
+class XSSScanner extends BaseScanner {
+    constructor() {
+        super('XSS');
+    }
+
+    startScan(target) {
+        // Implement the XSS scanning logic here
+        const result = `XSS vulnerabilities found on ${target}`;
+        this.logResult(result);
+        return result;
+    }
+}
+
+module.exports = XSSScanner;
