@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="css/styles.css">
+	<title>Dynascan DAST - Dashboard</title>
+</head>
+
+<body>
+	<header>
+		<h1>Dashboard</h1>
+		<nav>
+			<a href="index.html">Home</a>
+			<a href="guide.html">Guide</a>
+			<a href="about.html">About Us</a>
+		</nav>
+	</header>
+	<main>
+		<section>
+			<h2>Enter Scan Target</h2>
+			<input type="text" id="scanTarget" placeholder="Enter Scan Target">
+			<button id="startScan">Start Scan</button>
+		</section>
+		<section>
+			<h2>Scans in Progress</h2>
+			<div id="scansInProgress"></div>
+		</section>
+		<section>
+			<h2>Previous Reports</h2>
+			<div id="previousReports"></div>
+		</section>
+	</main>
+	<footer>
+		<p>© 2024 DynaScan DAST</p>
+	</footer>
+	<script src="js/app.js"></script>
+</body>
+
+</html>
