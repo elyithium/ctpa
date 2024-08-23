@@ -11,4 +11,4 @@ COPY . /app
 RUN pip install requests
 
 # Run vulnerability scanner script when the container launches
-CMD ["python", "scanner.py"]
+CMD ["python", "main.py"]
