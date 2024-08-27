@@ -10,3 +10,5 @@ def scan_security_misconfigurations(url):
     if "Content-Security-Policy" not in response.headers:
         vulnerabilities.append("Content-Security-Policy header missing")
     return vulnerabilities
+
+#test to push
