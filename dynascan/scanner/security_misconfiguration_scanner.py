@@ -1,39 +1,44 @@
+import os
 import requests
 
-# Defining the headers that are required to be checked 
+# Function to load headers from a file
+def load_headers(file_name):
 
-Header_list = [
+    file_path = os.path.join(os.path.dirname(__file__), file_name)
 
-    "X-Frame-Options",
+    headers = []
 
-    "X-Content-Type-Options",
+    try:
 
-    "Content-Security-Policy",
+        with open(file_path, 'r') as file:
 
-    "Strict-Transport-Security",
+            headers = [line.strip() for line in file.readlines()]
 
-    "Referrer-Policy",
+    except FileNotFoundError:
 
-    "Feature-Policy"
+        print(f"File {file_name} not found in {file_path}")
 
-]
+    return headers
+
+# List of headers to check
+headers_file = 'headers.txt'
+
+Header_list = load_headers(headers_file)
 
 def scan_security_misconfigurations(url):
 
     try:
 
         # Sending an HTTP GET request to the provided URL
-
         response = requests.get(url)
-
-        response.raise_for_status()  # Check if the request returned an HTTP error
+        # Check if the request returned an HTTP error
+        response.raise_for_status()  
 
     except requests.RequestException as reqexceptions:
 
         return [f"Error fetching URL {url}: {reqexceptions}"]
-
+    
     # Checking for missing headers
-
     missing_headers = []
 
     for header in Header_list:
@@ -43,11 +48,9 @@ def scan_security_misconfigurations(url):
             missing_headers.append(f"{header} header missing")
 
     # Scan for RIA policy files
-
     ria_vulnerabilities = scan_for_ria_policy_files(url)
 
     # Scan for improper logging
-
     improper_logging_issues = scan_for_improper_logging(url)
 
     return missing_headers + ria_vulnerabilities + improper_logging_issues
@@ -55,13 +58,11 @@ def scan_security_misconfigurations(url):
 def scan_for_ria_policy_files(base_url):
 
     # List of RIA policy files to check for
-
     policy_files = ["crossdomain.xml", "clientaccesspolicy.xml"]
 
     vulnerabilities = []
 
-    # Iterate over the policy files and construct the Url
-
+    # Iterate over the policy files and construct the URL
     for policy_file in policy_files:
 
         policy_url = f"{base_url}/{policy_file}"
@@ -69,39 +70,32 @@ def scan_for_ria_policy_files(base_url):
         try:
 
             # Send a GET request to the policy file URL
-
             response = requests.get(policy_url)
 
-            #If the status is OK
-
+            # If the status is OK
             if response.status_code == 200:
 
-                 # Policy file was found
-
+                # Policy file was found
                 vulnerabilities.append(f"Found {policy_file} at {policy_url}")
 
                 # Check if the policy file is overly permissive - Policies with “*” in them should be closely examined
-
                 if "*" in response.text:
 
                     vulnerabilities.append(f"Overly permissive policy found in {policy_file} at {policy_url}")
 
             else:
 
-                 # Policy file was not found
-
+                # Policy file was not found
                 vulnerabilities.append(f"{policy_file} not found at {policy_url}")
 
-      # Handling request exceptions
-
+        # Handling request exceptions
         except requests.RequestException as reqexceptions:
 
             vulnerabilities.append(f"Error accessing {policy_file} at {policy_url}: {reqexceptions}")
 
     return vulnerabilities
-    
-    # Scanning for improper logging
 
+# Scanning for improper logging
 def scan_for_improper_logging(url):
 
     logging_issues = []
@@ -113,7 +107,6 @@ def scan_for_improper_logging(url):
         response = requests.get(url)
 
         # Check the response for any sensitive keywords which should not be in the logs
-
         for word in sensitive_words:
 
             if word in response.text.lower():
