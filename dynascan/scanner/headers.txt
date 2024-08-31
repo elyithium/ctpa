@@ -1,0 +1,6 @@
+X-Frame-Options
+X-Content-Type-Options
+Content-Security-Policy
+Strict-Transport-Security
+Referrer-Policy
+Feature-Policy
