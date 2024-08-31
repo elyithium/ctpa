@@ -1,33 +1,36 @@
 import requests
 
+def load_payloads(file_path):
+
+    with open(file_path, 'r') as file:
+
+        return [line.strip() for line in file if line.strip()]
+
 def scan_xss(url, params):
-    # XSS payloads 
-    payloads = [
-        "<script>alert(1)</script>",
-        "\"><script>alert(1)</script>",
-        "<img src='x' onerror='alert(1)'>",
-        "<svg onload='alert(1)'>",
-        "javascript:alert(1)",
-        "<body onload='alert(1)'>",
-        "<iframe src='javascript:alert(1)'></iframe>",
-        "<marquee/onstart=alert(1)>",
-        "<input/onfocus=alert(1)>",
-        "%3Cscript%3Ealert(1)%3C/script%3E",  
-        "%3Cimg%20src='x'%20onerror='alert(1)'%3E", 
-        "%3Csvg%20onload='alert(1)'%3E"  
-    ]
-    
+
+    xsspayloads_file_path = 'scanner/xss_payloads.txt'
+
+    payloads = load_payloads(xsspayloads_file_path)
+
     vulnerabilities = []
-    
+
     for param in params:
+
         for payload in payloads:
+
             test_params = {key: (payload if key == param else value) for key, value in params.items()}
-            
+
             try:
+
                 response = requests.get(url, params=test_params)
-                if any(payload in response.text for payload in payloads):
+
+                if payload in response.text:
+
                     vulnerabilities.append((param, payload))
+
             except requests.RequestException as reqexception:
+
                 print(f"Request failed: {reqexception}")
-    
+
     return vulnerabilities
+
