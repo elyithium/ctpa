@@ -8,5 +8,10 @@ def scan_xss(url, params):
             test_params = {key: (payload if key == param else value) for key, value in params.items()}
             response = requests.get(url, params=test_params)
             if payload in response.text:
-                vulnerabilities.append((param, payload))
+                vulnerabilities.append({
+                    "issue": "Cross-Site Scripting (XSS)",
+                    "description": f"XSS vulnerability detected using payload: {payload}.",
+                    "severity": "High",
+                    "endpoint": url
+                })
     return vulnerabilities

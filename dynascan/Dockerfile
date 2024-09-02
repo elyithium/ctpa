@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . /app
 
 # Install required Python packages
-RUN pip install requests
+RUN pip install requests pyOpenSSL reportlab
 
 # Run vulnerability scanner script when the container launches
 CMD ["python", "main.py"]

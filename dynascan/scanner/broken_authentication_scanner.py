@@ -6,5 +6,10 @@ def scan_broken_authentication(url, params):
     response = requests.post(url, data=test_params)
     vulnerabilities = []
     if "incorrect password" not in response.text.lower() and response.status_code == 200:
-        vulnerabilities.append("Possible broken authentication detected")
+        vulnerabilities.append({
+            "issue": "Broken Authentication",
+            "description": "Possible broken authentication detected.",
+            "severity": "High",
+            "endpoint": url
+        })
     return vulnerabilities
