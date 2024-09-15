@@ -1,5 +1,11 @@
 import socket
 
+
+port_vulnerabilities = {
+    111: ["Portmap service: Denial of Service", "Remote code execution"],
+    8080: ["Weak authentication on web servers", "Cross-Site Scripting (XSS)"],
+    9090: ["Weak authentication", "Directory traversal"]
+}
 common_tcp_ports = [
     21, 22, 23, 25, 53, 80, 110, 111, 135, 139, 143, 443, 445, 993, 995, 1723, 
     3306, 3389, 5900, 8080, 8443, 8888, 9090, 49152, 49153, 49154, 49155, 49156, 
@@ -11,15 +17,18 @@ common_tcp_ports = [
     49185, 49186, 49187, 49188, 49189, 49190, 49191, 49192, 49193, 49194, 49195
 ]
 
-def scan_open_ports(target, ports=common_tcp_ports):
-    open_ports = []
+def scan_open_ports(target, ports):
+    open_ports = {}
+    
     for port in ports:
         try:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(1) 
+            sock.settimeout(1)  # Set a timeout for the connection attempt
             result = sock.connect_ex((target, port))
             if result == 0:
-                open_ports.append(port)
+                # If the port is open, check for known vulnerabilities
+                vulnerabilities = port_vulnerabilities.get(port, ["No known vulnerabilities"])
+                open_ports[port] = vulnerabilities
             sock.close()
         except Exception as e:
             print(f"Error scanning port {port}: {e}")
