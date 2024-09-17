@@ -4,9 +4,9 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Indenter
 
-def generate_reportlab_pdf(site, summary, alerts, file_path='/app/reports/vulnerability_report.pdf'):
+def generate_reportlab_pdf(site, summary, alerts, category_summary, file_path='/app/reports/vulnerability_report.pdf'):
     try:
         # Ensure the directory exists
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
@@ -44,7 +44,7 @@ def generate_reportlab_pdf(site, summary, alerts, file_path='/app/reports/vulner
         # Risk level colors including Informational
         summary_severity_colors = {'High': colors.red, 'Medium': colors.orange, 'Low': colors.yellow, 'Informational': colors.blue}
 
-        # Align the summary table to the left
+        # Align the summary table with the title above (left-aligned)
         summary_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
@@ -62,40 +62,79 @@ def generate_reportlab_pdf(site, summary, alerts, file_path='/app/reports/vulner
                 ('BACKGROUND', (0, i), (0, i), bg_color),
             ]))
 
+        # Indent to align with the title
+        elements.append(Indenter(left=20))
         elements.append(summary_table)
+        elements.append(Indenter(left=-20))  # Reset indentation
         elements.append(Spacer(1, 24))
 
-        # Detailed Alerts
-        elements.append(Paragraph("Alerts", sub2heading_style))
-        data = [['Issue', 'Description', 'Severity', 'Endpoint']]
-        severity_colors = {'High': colors.red, 'Medium': colors.orange, 'Low': colors.yellow, 'Informational': colors.blue}
+        # Category Summary (Left Aligned with Title)
+        elements.append(Paragraph("Category Summary", sub2heading_style))
+        data = [['Category', 'Number of Instances']] + [[category, str(count)] for category, count in category_summary.items()]
+        category_table = Table(data, colWidths=[2 * inch, 1.5 * inch])
 
-        for alert in alerts:
-            issue = Paragraph(alert['issue'], normal_style)
-            description = Paragraph(alert['description'], normal_style)
-            severity = alert['severity']
-            endpoint = Paragraph(alert['endpoint'], normal_style)
-
-            data.append([issue, description, severity, endpoint])
-
-        alerts_table = Table(data, colWidths=[1.5 * inch, 2.5 * inch, 1 * inch, 2 * inch])
-        alerts_table.setStyle(TableStyle([
+        category_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
             ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ]))
 
-        # Apply color based on severity for the Severity column in Alerts
-        for i, alert in enumerate(alerts, start=1):
-            bg_color = severity_colors.get(alert['severity'], colors.white)
+        elements.append(Indenter(left=20))  # Indent category table
+        elements.append(category_table)
+        elements.append(Indenter(left=-20))  # Reset indentation
+        elements.append(Spacer(1, 24))
+
+        # Detailed Alerts Organized by Category
+        elements.append(Paragraph("Alerts Organized by Category", sub2heading_style))
+
+        # Organize alerts by category
+        organized_alerts = {}
+        for alert in alerts:
+            category = alert['category']
+            if category not in organized_alerts:
+                organized_alerts[category] = []
+            organized_alerts[category].append(alert)
+
+        # Severity color definitions for alerts
+        severity_colors = {'High': colors.red, 'Medium': colors.orange, 'Low': colors.yellow, 'Informational': colors.blue}
+
+        for category, alerts_list in organized_alerts.items():
+            # Add a row for each category
+            elements.append(Paragraph(f"{category}", subheading_style))
+            data = [['Issue', 'Description', 'Severity', 'Endpoint']]
+
+            for alert in alerts_list:
+                issue = Paragraph(alert['issue'], normal_style)
+                description = Paragraph(alert['description'], normal_style)
+                severity = alert['severity']
+                endpoint = Paragraph(alert['endpoint'], normal_style)
+
+                data.append([issue, description, severity, endpoint])
+
+            alerts_table = Table(data, colWidths=[1.5 * inch, 2.5 * inch, 1 * inch, 2 * inch])
             alerts_table.setStyle(TableStyle([
-                ('BACKGROUND', (2, i), (2, i), bg_color),
+                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
             ]))
 
-        elements.append(alerts_table)
+            # Apply color based on severity for the Severity column in Alerts
+            for i, alert in enumerate(alerts_list, start=1):
+                bg_color = severity_colors.get(alert['severity'], colors.white)
+                alerts_table.setStyle(TableStyle([
+                    ('BACKGROUND', (2, i), (2, i), bg_color),
+                ]))
+
+            elements.append(Indenter(left=20))  # Indent alert tables
+            elements.append(alerts_table)
+            elements.append(Indenter(left=-20))  # Reset indentation
+            elements.append(Spacer(1, 12))
 
         # Build the PDF
         doc.build(elements)

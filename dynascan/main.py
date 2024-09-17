@@ -15,7 +15,13 @@ if __name__ == "__main__":
 
      # Scanner Site and run scan call
     scanner = VulnerabilityScanner("http://127.0.0.1:8080/", endpoints)
+    #scanner = VulnerabilityScanner("https://www.hackthissite.org/", endpoints)
     scanner.run_scans()
 
      # Generate Report Change to pdf or console
     scanner.generate_report(output_format='pdf')
+
+
+    #Console Commands:
+    #docker build -t dynascan .
+    #docker run --network="host" -v "${pwd}/reports:/app/reports" -it --rm dynascan
