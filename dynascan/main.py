@@ -1,4 +1,4 @@
-
+#main.py
 from scanner_engine.vulnerability_scanner import VulnerabilityScanner
 
 if __name__ == "__main__":
