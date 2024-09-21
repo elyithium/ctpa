@@ -8,20 +8,23 @@ CSRF_PAYLOADS = [
     {"address": "1234 Fake St."},     # Test address update
 ]
 
+CSRF_ENDPOINTS = [
+    "/CSRF",  # List relevant CSRF endpoints here
+    "/csrf",  # Make sure to add all variations (case-sensitive)
+]
+
+def is_csrf_endpoint(url):
+    """Check if the endpoint is relevant for CSRF testing."""
+    for endpoint in CSRF_ENDPOINTS:
+        if endpoint in url:
+            return True
+    return False
+
 def send_csrf_payload(url, payload, token=None):
-    """
-    Send a CSRF payload to the server and analyze the response.
-    Arguments:
-    - url: The URL of the form page to scan for CSRF vulnerabilities.
-    - payload: The data to send in the form, simulating a CSRF attack.
-    - token: Optional CSRF token to include in the request (if provided).
-    Returns:
-    - str: A description of the issue if a vulnerability is found, else None.
-    """
     try:
         # If a CSRF token is provided, add it to the payload
         if token:
-            payload["CSRFToken"] = token
+            payload["OWY4NmQwODE4ODRjN2Q2NTlhMmZlYWEwYzU1YWQwMTVhM2JmNGYxYjJiMGI4MjJjZDE1ZDZMGYwMGEwOA=="] = token
 
         # Send the payload to the server
         response = requests.post(url, data=payload)
@@ -33,9 +36,9 @@ def send_csrf_payload(url, payload, token=None):
         if response.status_code == 200:
             # If no token, vulnerability is detected
             if token is None:
-                return f"CSRF vulnerability detected: Request accepted without CSRF token for '{field}'."
+                return f"CSRF detected: Server accepted request without CSRF token for '{field}' submission."
             else:
-                return f"CSRF token validation passed for the field '{field}'."
+                return f"CSRF token validation passed for '{field}' submission."
         return None
 
     except Exception as e:
@@ -43,15 +46,12 @@ def send_csrf_payload(url, payload, token=None):
         return None
 
 def scan_csrf(url):
-    """
-    Scan for CSRF vulnerabilities by testing multiple payloads with and without CSRF tokens.
-    Stop testing for a payload once a vulnerability is detected.
-    Arguments:
-    - url: The URL of the form page to scan for CSRF vulnerabilities.
-    Returns:
-    - A list of issues detected, or an empty list if none are found.
-    """
+    """Scan for CSRF vulnerabilities only if the URL matches CSRF endpoints."""
     issues = []
+
+    # Ensure we are scanning a CSRF-relevant endpoint
+    if not is_csrf_endpoint(url):
+        return []  # Return empty list if not a CSRF-relevant endpoint
 
     # Case 1: Test all payloads without a CSRF token (simulate attack)
     for payload in CSRF_PAYLOADS:
@@ -62,7 +62,7 @@ def scan_csrf(url):
             continue
 
         # Case 2: Test with a valid CSRF token (only if no vulnerability was found)
-        valid_token = "valid_token_example"  # Replace with a real token if available
+        valid_token = "OWY4NmQwODE4ODRjN2Q2NTlhMmZlYWEwYzU1YWQwMTVhM2JmNGYxYjJiMGI4MjJjZDE1ZDZMGYwMGEwOA=="  # Replace with a real token if available
         result_with_token = send_csrf_payload(url, payload, token=valid_token)
         if result_with_token:
             issues.append(result_with_token)
