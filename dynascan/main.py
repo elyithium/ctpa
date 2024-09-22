@@ -3,7 +3,10 @@ from scanner_engine.vulnerability_scanner import VulnerabilityScanner
 
 if __name__ == "__main__":
     endpoints = {
-        "WebGoat/SqlInjection/attack": {"username": "test", "password": "test"},
+        "WebGoat/SqlInjectionAdvanced/lesson1": {"last_name": ""},
+        "WebGoat/SqlInjectionAdvanced/lesson2": {"last_name": ""},
+        "WebGoat/SqlInjectionAdvanced/lesson3": {"last_name": ""},
+        "WebGoat/SqlInjectionAdvanced/challenge": {"username_reg": "Tom"},
         "WebGoat/XSS/attack": {"q": "test"},
         "WebGoat/Auth/login": {"username": "test", "password": "test"},
         "WebGoat/SensitiveData": {},

