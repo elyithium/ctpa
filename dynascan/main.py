@@ -11,9 +11,8 @@ if __name__ == "__main__":
         "WebGoat/Auth/login": {"username": "test", "password": "test"},
         "WebGoat/SensitiveData": {},
         "WebGoat/AccessControl/attack": {},
-        "WebGoat/Deserialization/attack": {"data": "test"},
         "WebGoat/login": {},
-        "WebGoat/CSRF": {}  # CSRF endpoint
+        "WebGoat/CSRF": {}  
     }
 
     base_url = "http://127.0.0.1:8080/"
