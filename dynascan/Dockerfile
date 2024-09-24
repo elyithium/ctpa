@@ -10,7 +10,7 @@ COPY . /app
 # Install required Python packages
 RUN pip install requests
 RUN pip install colorama
-
+RUN pip install pyOpenSSl
 
 # Run vulnerability scanner script when the container launches
 CMD ["python", "main.py"]
