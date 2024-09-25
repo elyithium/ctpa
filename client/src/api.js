@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an Axios instance
 const instance = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000', // Environment-specific base URL
+  baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000', // Environment-specific base URL
   headers: {
     'Content-Type': 'application/json',
     // Add other default headers here if needed

@@ -1,6 +1,3 @@
-/* Name : Ali Mohammad Jobaer
-Student ID : 103835483 */
-
 import React from 'react';
 import Homepage from './pages/HomePage';
 import Dashboard from './pages/Dashboard';

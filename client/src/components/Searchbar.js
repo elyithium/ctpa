@@ -1,5 +1,3 @@
-/* Name : Ali Mohammad Jobaer
-Student ID : 103835483 */
 import * as React from 'react';
 import {  Link as RouterLink } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
