@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\corby\Documents\GitHub\elyithium\ctpa\server\venv"
+VIRTUAL_ENV="D:\github\elyithium\ctpa\server\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
