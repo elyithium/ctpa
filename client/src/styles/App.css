@@ -24,10 +24,12 @@ body {
    - Light background with a solid border on top.
    - Positioned statically and spans the entire width of its container.
 */
+Button {
+	color: #828282
+}
 
 .footer {
     background-color: #20252B;
-    border-top: 2px solid rgb(0, 0, 0);
     position: static;
     width: 100%;
     bottom: 0;

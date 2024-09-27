@@ -2,7 +2,8 @@ import React from 'react';
 import Homepage from './pages/HomePage';
 import Dashboard from './pages/Dashboard';
 import Reports from './pages/Reports';
-import PreviousReportsPage from './pages/PreviousReportsPage';
+import AboutUs from './pages/AboutUs';
+import Guide from './pages/Guide';
 import Container from '@mui/material/Container';
 import { Routes, Route, BrowserRouter as Router, Navigate } from 'react-router-dom';
 import Searchbar from './components/Searchbar';
@@ -42,7 +43,8 @@ export default function App() {
                                 <Route path="/Homepage/Homepage" element={<Homepage />} />
                                 <Route path="/Dashboard/Dashboard" element={<Dashboard />} />
                                 <Route path="/Reports/Reports" element={<Reports />} />
-                                <Route path="/PreviousReportsPage/PreviousReportsPage" element={<PreviousReportsPage />} />
+								<Route path="/AboutUs/AboutUs" element={<AboutUs />} />
+								<Route path="/Guide/Guide" element={<Guide />} />
                             </Routes>
                         </Container>
                     </Paper>

@@ -29,8 +29,8 @@ export default function Searchbar() {
 
                     <Button color="inherit" component={RouterLink} to="/Homepage/HomePage">Home</Button>
                     <Button color="inherit" component={RouterLink} to="/Dashboard/Dashboard">Dashboard</Button>
-                    <Button color="inherit" component={RouterLink} to="/Reports/Reports">Guide</Button>
-                    <Button color="inherit" component={RouterLink} to="/PreviousReportsPage/PreviousReportsPage">About Us</Button>
+					<Button color="inherit" component={RouterLink} to="/Guide/Guide">Guide</Button>
+					<Button color="inherit" component={RouterLink} to="/AboutUs/AboutUs">About Us</Button>
                 </Toolbar>
             </AppBar>
         </Box>
