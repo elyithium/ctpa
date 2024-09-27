@@ -10,15 +10,16 @@ from .domain_checks import (
     check_key_exchange,
     check_encryption_algorithm,
     check_perfect_forward_secrecy,
-    check_mac_algorithm,
+    check_hash_algorithm,
     check_tls_downgrade_protection,
-    check_public_key_length
+    check_public_key_length,
+    check_authentication_algorithm,
+    check_mode_of_operation
 )
 
 
 from .endpoint_checks import (
 	check_encoding_usage,
-	check_hashing_algorithms,
 	check_message_integrity_and_signatures
 )
 
@@ -70,9 +71,9 @@ def scan_cryptographic_failures_domain(domain):
 
 				# Cipher suite info
                 cipher_suite, tls_version, key_length = ssl_sock.cipher()
-                key_exchange, authentication, encryption_algorithm, mode_of_operation, mac_algorithm = split_cipher_suite(cipher_suite)
+                key_exchange, authentication, encryption_algorithm, mode_of_operation, hash_algorithm = split_cipher_suite(cipher_suite)
                 protocol_version = ssl_sock.version()  # TLS version
-                print(key_exchange, authentication, encryption_algorithm, mode_of_operation, mac_algorithm)
+                print(key_exchange, authentication, encryption_algorithm, mode_of_operation, hash_algorithm)
                 # Get certificate details
                 cert_bin = get_ssl_certificate(domain)
                 cert = load_certificate(cert_bin)
@@ -80,35 +81,41 @@ def scan_cryptographic_failures_domain(domain):
 
 
                 # Domain-Wide Checks into results []
-                #print('1')
+                # Expired Cert Check
                 cert_result = check_protocol_certificate(cert, domain)
                 results.append(cert_result)
 
-                #print('2')
+                # Protocol Check
                 protocol_result =  check_security_defaults(protocol_version, domain)
                 results.append(protocol_result)
 
-                #print('3')
+                # Key Checks
                 key_exchange_result = check_key_exchange(key_exchange, domain)
                 results.append(key_exchange_result)
 
-                #print('4')
-                encryption_algo_result = check_encryption_algorithm(encryption_algorithm, domain)
-                results.append(encryption_algo_result)
-
-                #print('5')
-                mac_algo_result = check_mac_algorithm(mac_algorithm, domain)
-                results.append(mac_algo_result)
-
-                #print('6')
                 pfs_result = check_perfect_forward_secrecy(key_exchange, domain)
                 results.append(pfs_result)
 
-                #print('7')
                 key_length_result = check_public_key_length(key_size, domain)
                 results.append(key_length_result)
 
-                #print('8')
+				# Auth Check
+                auth_result = check_authentication_algorithm(authentication, domain)
+                results.append(auth_result)
+
+                # Encryption Check
+                encryption_algo_result = check_encryption_algorithm(encryption_algorithm, domain)
+                results.append(encryption_algo_result)
+
+				# Mode of operation Check
+                mode_of_operation_result = check_mode_of_operation(mode_of_operation, domain)
+                results.append(mode_of_operation_result)
+
+                # Hash Check
+                hash_algo_result = check_hash_algorithm(hash_algorithm, domain)
+                results.append(hash_algo_result)
+
+                # TLS Downgrade Check
                 tls_downgrade_result = check_tls_downgrade_protection(domain)
                 results.append(tls_downgrade_result)
 
@@ -138,10 +145,6 @@ def scan_cryptographic_failures_endpoint(endpoint, params):
         encoding_result = check_encoding_usage(content, endpoint)
         results.append(encoding_result)
 
-        #print('2')
-        hashing_result = check_hashing_algorithms(content, endpoint)
-        results.append(hashing_result)
-
         #print('3')
         signatures_result = check_message_integrity_and_signatures(content, endpoint)
         results.append(signatures_result)
@@ -160,14 +163,14 @@ def split_cipher_suite(cipher_suite):
     authentication = None
     encryption_algorithm = None
     mode_of_operation = None
-    mac_algorithm = None
+    hash_algorithm = None
 
     # Define known elements
     key_exchange_algorithms = ['ECDHE', 'DHE', 'DH']
     authentication_algorithms = ['RSA', 'ECDSA', 'DSA']
     encryption_algorithms = ['AES', 'DES', 'ChaCha20', 'RC4']
     modes_of_operation = ['GCM', 'CBC', 'CCM']
-    mac_algorithms = ['SHA256', 'SHA384', 'SHA512', 'MD5']
+    hash_algorithm = ['SHA256', 'SHA384', 'SHA512', 'MD5']
 
     # Step 3: Parse the cipher suite
     for part in parts:
@@ -184,11 +187,11 @@ def split_cipher_suite(cipher_suite):
         elif part in modes_of_operation and mode_of_operation is None:
             mode_of_operation = part
         # Check for MAC algorithm
-        elif part in mac_algorithms and mac_algorithm is None:
-            mac_algorithm = part
+        elif part in hash_algorithm and hash_algorithm is None:
+            hash_algorithm = part
 
     # Handle cases where encryption_algorithm is missing (e.g., ECDHE-RSA-GCM-SHA256)
     if encryption_algorithm is None and mode_of_operation is not None:
         encryption_algorithm = parts[2]  # Assume the second part before the mode is the encryption algorithm
 
-    return key_exchange, authentication, encryption_algorithm, mode_of_operation, mac_algorithm
+    return (key_exchange or 'Unknown'), (authentication or 'Unknown'), (encryption_algorithm or 'Unknown'), (mode_of_operation or 'Unknown'), (hash_algorithm or 'Unknown')

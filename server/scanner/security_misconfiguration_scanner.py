@@ -14,9 +14,7 @@ def scan_security_misconfigurations(url):
 
     if missing_headers:
 
-        for header in missing_headers:
-
-            results.append(f"{header} header not set")
+        results.extend(missing_headers)
 
     # Scan for RIA (Rich Internet Application) policy files
 
@@ -73,11 +71,18 @@ def scan_for_missing_headers(url):
 
             if header not in response.headers:
 
-                missing_headers.append(header)
+                missing_headers.append({
+                    "issue": "Missing Security Header",
+                    "description": f"The '{header}' security header is not set.",
+                    "severity": "Medium"
+                })
 
     except requests.RequestException as reqexception:
-
-        print(f"Error fetching URL {url}: {reqexception}")
+        missing_headers.append({
+            "issue": "Request Error",
+            "description": f"Error fetching URL {url}: {reqexception}",
+            "severity": "High"
+        })
 
     return missing_headers
 
@@ -117,13 +122,19 @@ def scan_for_ria_policy_files(base_url):
 
             if response.status_code == 200 and "*" in response.text:
 
-                vulnerabilities.append(f"Overly permissive policy file found")
+                vulnerabilities.append({
+                    "issue": "Overly Permissive Policy File",
+                    "description": f"The policy file '{policy_file}' at {policy_url} is overly permissive and may expose sensitive data.",
+                    "severity": "Medium"
+                })
 
         except requests.RequestException as reqexception:
 
-            vulnerabilities.append(
-                f"Error accessing {policy_file} at {policy_url}: {reqexception}"
-            )
+            vulnerabilities.append({
+                "issue": "Request Error",
+                "description": f"Error accessing {policy_file} at {policy_url}: {reqexception}",
+                "severity": "High"
+            })
 
     return vulnerabilities
 
@@ -144,13 +155,19 @@ def scan_for_improper_logging(url):
 
             if word in response.text.lower():
 
-                logging_issues.append(f"Sensitive data found in logs: {word}")
+                logging_issues.append({
+                    "issue": "Improper Logging",
+                    "description": f"Sensitive data found in logs: '{word}'. This may expose critical information.",
+                    "severity": "High"
+                })
 
     except requests.RequestException as reqexception:
 
-        logging_issues.append(
-            f"Error while checking for logging issues at {url}: {reqexception}"
-        )
+        logging_issues.append({
+            "issue": "Request Error",
+            "description": f"Error while checking for logging issues at {url}: {reqexception}",
+            "severity": "High"
+        })
 
     return logging_issues
 
@@ -162,7 +179,6 @@ def scan_for_xxe_injection(url):
     xxe_payloads = load_payloads("scanner/xxe_payloads.txt")
 
     results = []
-    detected_payloads = []
 
     for payload in xxe_payloads:
 
@@ -172,15 +188,18 @@ def scan_for_xxe_injection(url):
                 url, data=payload, headers={"Content-Type": "application/xml"}
             )
             if response.status_code == 200:
-                detected_payloads.append(payload)
+                results.append({
+                    "issue": "XML External Entity (XXE) Injection detected",
+                    "description": "Possible XXE vulnerability detected. Application may be processing untrusted XML data.",
+                    "severity": "High"
+                })
         except requests.RequestException as reqexception:
-            results.append(
-                f"Error while testing XXE injection at {url}: {reqexception}"
-            )
+            results.append({
+                "issue": "Request Error",
+                "description": f"Error while testing XXE injection at {url}: {reqexception}",
+                "severity": "High"
+            })
             break
-
-    if detected_payloads:
-        results.append("XML External Entity (XXE) Injection detected.")
 
     return results
 
@@ -193,8 +212,6 @@ def scan_for_tag_injection(url):
 
     results = []
 
-    detected_payloads = []
-
     for payload in tag_injection_payloads:
 
         try:
@@ -205,19 +222,22 @@ def scan_for_tag_injection(url):
 
             if response.status_code == 200:
 
-                detected_payloads.append(payload)
+                results.append({
+                    "issue": "Tag Injection Vulnerability detected",
+                    "description": "Detected potential tag injection vulnerability. Application may be vulnerable to injecting arbitrary tags.",
+                    "severity": "Medium"
+                })
 
         except requests.RequestException as reqexception:
 
-            results.append(
-                f"Error while testing Tag Injection at {url}: {reqexception}"
-            )
+            results.append({
+                "issue": "Request Error",
+                "description": f"Error while testing Tag Injection at {url}: {reqexception}",
+                "severity": "High"
+            })
 
             break
 
-    if detected_payloads:
-
-        results.append("Tag Injection vulnerability detected.")
 
     return results
 

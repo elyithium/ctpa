@@ -11,7 +11,7 @@ SQL_PAYLOADS = [
     "'; SELECT IF(1=1, SLEEP(5), 0)--",
     "' AND SLEEP(5)--",
     "' OR SLEEP(5) --",
-    "' OR '1'='1' --", 
+    "' OR '1'='1' --",
     "' OR 1=1 --"
 ]
 
@@ -34,37 +34,49 @@ EXPECTED_SQL_ERRORS = [
 # Function to handle SQL Injection Scanning
 def scan_sql_injection(url, params, payloads=SQL_PAYLOADS, expected_errors=EXPECTED_SQL_ERRORS):
     vulnerabilities = []
-    
+
     for param in params:
         for payload in payloads:
             # Inject the payload into the parameter
             test_params = {key: (payload if key == param else value) for key, value in params.items()}
             #print(f"Testing {url} with {test_params}")  # Logging for debugging
-            
+
             try:
                 # Sending the request
                 response = requests.get(url, params=test_params, timeout=10)
-                
+
                 # Log the HTTP response code for further analysis
                 #print(f"Response Code: {response.status_code}")
                 #print(f"Response Text: {response.text[:500]}...")  # Print first 500 chars of the response
-                
+
                 # Check if response contains SQL errors or abnormal behavior
                 if any(error in response.text.lower() for error in expected_errors):
-                    vulnerabilities.append((param, payload, 'Error-based SQLi'))
-                
+                    vulnerabilities.append({
+                        "issue": "SQL Injection - Error-Based",
+                        "description": f"Possible SQL Injection detected with payload '{payload}' on parameter '{param}'. Error message found in response.",
+                        "severity": "High"
+                    })
+
                 # Check for time-based SQL injection by measuring delay
                 elif "sleep" in payload.lower() or "waitfor delay" in payload.lower():
                     start_time = time.time()
                     response_time = time.time() - start_time
                     if response_time > 5:  # Adjust threshold accordingly
-                        vulnerabilities.append((param, payload, 'Time-based Blind SQLi'))
-            
+                        vulnerabilities.append({
+                            "issue": "SQL Injection - Time-Based",
+                            "description": f"Possible Time-Based Blind SQL Injection detected with payload '{payload}' on parameter '{param}'. Significant delay observed in response.",
+                            "severity": "High"
+                        })
+
             except requests.exceptions.Timeout:
                 # If a timeout occurs, assume time-based blind SQLi worked
-                vulnerabilities.append((param, payload, 'Timeout - Possible Time-based Blind SQLi'))
+                vulnerabilities.append({
+                    "issue": "SQL Injection - Time-Based",
+                    "description": f"Possible Time-Based Blind SQL Injection detected with payload '{payload}' on parameter '{param}'. Request timed out, indicating a potential delay-based attack.",
+                    "severity": "High"
+                })
 
             except Exception as e:
                 print(f"Error occurred: {str(e)}")
-    
+
     return vulnerabilities

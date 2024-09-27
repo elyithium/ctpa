@@ -36,14 +36,25 @@ def send_csrf_payload(url, payload, token=None):
         if response.status_code == 200:
             # If no token, vulnerability is detected
             if token is None:
-                return f"CSRF detected: Server accepted request without CSRF token for '{field}' submission."
+                return {
+                    "issue": "CSRF Vulnerability",
+                    "description": f"Server accepted request without CSRF token for '{field}' submission.",
+                    "severity": "High"
+                }
             else:
-                return f"CSRF token validation passed for '{field}' submission."
+                return {
+                    "issue": "CSRF Token Validation",
+                    "description": f"CSRF token validation passed for '{field}' submission.",
+                    "severity": "Informational"
+                }
         return None
 
     except Exception as e:
-        print(f"Error during CSRF payload test: {e}")
-        return None
+        return {
+            "issue": "Request Error",
+            "description": f"Error during CSRF payload test: {str(e)}",
+            "severity": "Medium"
+        }
 
 def scan_csrf(url):
     """Scan for CSRF vulnerabilities only if the URL matches CSRF endpoints."""

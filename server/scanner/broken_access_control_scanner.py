@@ -15,9 +15,12 @@ def scan_broken_access_control(url, params):
         try:
             response = requests.post(url, data=payload)
             if response.status_code == 200:
-                vulnerabilities.append(
-                    (payload, f"Access control issue: {response.status_code} for payload {payload}")
-                )
+                vulnerabilities.append({
+                    "issue": "Broken Access Control",
+                    "description": f"Access control issue:  {response.status_code} detected with payload: {payload}. This role or action should not have access to this resource.",
+                    "payload": payload,
+					"severity": "High"
+                })
         except requests.RequestException as e:
             vulnerabilities.append((payload, f"Error occurred: {str(e)}"))
 

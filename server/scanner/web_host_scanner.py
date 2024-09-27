@@ -45,6 +45,7 @@ def scan_web_host_info(url):
             "security_headers": {}
         }
 
+
         # Check for each security header
         for header, info in SECURITY_HEADERS.items():
             if header in headers:

@@ -4,11 +4,13 @@ import requests
 def load_payloads(file_path):
 
     #Load payloads from the provided file.
+    try:
+        with open(file_path, "r") as file:
+            return [line.strip() for line in file if line.strip()]
 
-    with open(file_path, "r") as file:
-
-        return [line.strip() for line in file if line.strip()]
-
+    except FileNotFoundError:
+        print(f"Payload file not found: {file_path}")
+        return []
 
 def is_reflected_xss(response, payload):
 
@@ -67,13 +69,23 @@ def scan_xss(url, params, method="GET"):
 
                 if is_reflected_xss(response, payload):
 
-                    vulnerabilities.append((param, payload, "Reflected XSS"))
+                    vulnerabilities.append({
+                        "issue": "Reflected XSS",
+                        "description": f"Reflected XSS vulnerability detected using payload: {payload}. Parameter: {param}.",
+                        "severity": "High",
+                        "details": f"Response contains the payload: {payload}"
+                    })
 
                 # DOM-based XSS detection
 
                 if is_dom_based_xss(response):
 
-                    vulnerabilities.append((param, payload, "DOM-based XSS"))
+                    vulnerabilities.append({
+                        "issue": "DOM-based XSS",
+                        "description": f"Potential DOM-based XSS vulnerability detected. Payload: {payload}. Parameter: {param}.",
+                        "severity": "Medium",
+                        "details": f"Response contains DOM-related patterns indicating potential vulnerability."
+                    })
 
             except requests.RequestException as req_exception:
 
@@ -115,7 +127,12 @@ def scan_stored_xss(url, post_params, check_url):
 
                 if payload in get_response.text:
 
-                    vulnerabilities.append((param, payload, "Stored XSS"))
+                    vulnerabilities.append({
+                        "issue": "Stored XSS",
+                        "description": f"Stored XSS vulnerability detected. Payload: {payload}. Parameter: {param}.",
+                        "severity": "High",
+                        "details": f"Payload found in response after submitting data to {url} and checking {check_url}."
+                    })
 
             except requests.RequestException as req_exception:
 

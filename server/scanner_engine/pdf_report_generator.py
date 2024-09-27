@@ -6,7 +6,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Indenter
 
-def generate_reportlab_pdf(site, summary, alerts, category_summary, file_path='/app/reports/vulnerability_report.pdf'):
+def generate_reportlab_pdf(site, summary, category_summary, detailed_results, file_path='./reports/vulnerability_report.pdf'):
     try:
         # Ensure the directory exists
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
@@ -90,51 +90,46 @@ def generate_reportlab_pdf(site, summary, alerts, category_summary, file_path='/
         # Detailed Alerts Organized by Category
         elements.append(Paragraph("Alerts Organized by Category", sub2heading_style))
 
-        # Organize alerts by category
-        organized_alerts = {}
-        for alert in alerts:
-            category = alert['category']
-            if category not in organized_alerts:
-                organized_alerts[category] = []
-            organized_alerts[category].append(alert)
-
         # Severity color definitions for alerts
         severity_colors = {'High': colors.red, 'Medium': colors.orange, 'Low': colors.yellow, 'Informational': colors.blue}
 
-        for category, alerts_list in organized_alerts.items():
-            # Add a row for each category
-            elements.append(Paragraph(f"{category}", subheading_style))
-            data = [['Issue', 'Description', 'Severity', 'Endpoint']]
+        for result in detailed_results:
+            category = result.get('type', 'Uncategorized')
+            vulnerabilities = result.get('vulnerabilities', [])
 
-            for alert in alerts_list:
-                issue = Paragraph(alert['issue'], normal_style)
-                description = Paragraph(alert['description'], normal_style)
-                severity = alert['severity']
-                endpoint = Paragraph(alert['endpoint'], normal_style)
+            if vulnerabilities:
+                elements.append(Paragraph(f"{category}", subheading_style))
+                data = [['Issue', 'Description', 'Severity', 'Endpoint']]
 
-                data.append([issue, description, severity, endpoint])
+                for vuln in vulnerabilities:
+                    issue = Paragraph(vuln.get('issue', 'N/A'), normal_style)
+                    description = Paragraph(vuln.get('description', 'N/A'), normal_style)
+                    severity = vuln.get('severity', 'N/A')
+                    endpoint = Paragraph(vuln.get('endpoint', 'N/A'), normal_style)
 
-            alerts_table = Table(data, colWidths=[1.5 * inch, 2.5 * inch, 1 * inch, 2 * inch])
-            alerts_table.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black),
-            ]))
+                    data.append([issue, description, severity, endpoint])
 
-            # Apply color based on severity for the Severity column in Alerts
-            for i, alert in enumerate(alerts_list, start=1):
-                bg_color = severity_colors.get(alert['severity'], colors.white)
+                alerts_table = Table(data, colWidths=[1.5 * inch, 2.5 * inch, 1 * inch, 2 * inch])
                 alerts_table.setStyle(TableStyle([
-                    ('BACKGROUND', (2, i), (2, i), bg_color),
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
                 ]))
 
-            elements.append(Indenter(left=20))  # Indent alert tables
-            elements.append(alerts_table)
-            elements.append(Indenter(left=-20))  # Reset indentation
-            elements.append(Spacer(1, 12))
+                # Apply color based on severity for the Severity column in Alerts
+                for i, vuln in enumerate(vulnerabilities, start=1):
+                    bg_color = severity_colors.get(vuln.get('severity', 'N/A'), colors.white)
+                    alerts_table.setStyle(TableStyle([
+                        ('BACKGROUND', (2, i), (2, i), bg_color),
+                    ]))
+
+                elements.append(Indenter(left=20))  # Indent alert tables
+                elements.append(alerts_table)
+                elements.append(Indenter(left=-20))  # Reset indentation
+                elements.append(Spacer(1, 12))
 
         # Build the PDF
         doc.build(elements)
