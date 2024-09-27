@@ -47,8 +47,8 @@ const Dashboard = () => {
             const reportId = response.data.report._id;
             //console.log(reportId);
             localStorage.setItem('latestReportId', reportId);
-            localStorage.setItem('scanResults', JSON.stringify(response.data.report.vulnerabilities));
-            setOpenSnackbar(true);
+			localStorage.setItem('scanResults', JSON.stringify(response.data.report.vulnerabilities));
+			setOpenSnackbar(true);
             navigate('/Reports/Reports');
         } catch (error) {
             console.error('Error during scan:', error);

@@ -30,6 +30,7 @@ def scan():
 
     scanner = VulnerabilityScanner(base_url, endpoints, target_ip, target_url)
     scanner.run_scans()
+    scanner.generate_report()
     results = scanner.results
 
     return jsonify({"report": {"vulnerabilities": results}}), 200
