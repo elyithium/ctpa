@@ -12,7 +12,9 @@ if __name__ == "__main__":
         "WebGoat/SensitiveData": {},
         "WebGoat/AccessControl/attack": {},
         "WebGoat/login": {},
-        "WebGoat/CSRF": {}  
+        "WebGoat/CSRF": {},
+        "WebGoat/InsecureDeserialization/attack": {"serialized_data": ""},
+        "WebGoat/SerializationBasics/attack": {"input": ""}
     }
 
     base_url = "http://127.0.0.1:8080/"
