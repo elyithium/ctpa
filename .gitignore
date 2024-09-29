@@ -10,6 +10,9 @@
 
 # production
 /build
+server/venv
+server/__pycache__
+server/scanner/__pycache__
 
 # misc
 .DS_Store

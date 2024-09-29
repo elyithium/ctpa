@@ -1,19 +1,11 @@
-import os
 from datetime import datetime
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Indenter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 
 def generate_reportlab_pdf(site, summary, category_summary, detailed_results, file_path='./reports/vulnerability_report.pdf'):
-    try:
-        # Ensure the directory exists
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
-    except Exception as e:
-        print(f"Failed to create directory: {e}")
-        return
-
     try:
         # Create the PDF document
         doc = SimpleDocTemplate(file_path, pagesize=letter)
@@ -41,34 +33,26 @@ def generate_reportlab_pdf(site, summary, category_summary, detailed_results, fi
         data = [['Risk Level', 'Number of Alerts']] + [[level, str(count)] for level, count in summary.items()]
         summary_table = Table(data, colWidths=[2 * inch, 1.5 * inch])
 
-        # Risk level colors including Informational
         summary_severity_colors = {'High': colors.red, 'Medium': colors.orange, 'Low': colors.yellow, 'Informational': colors.blue}
-
-        # Align the summary table with the title above (left-aligned)
         summary_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
-            ('ALIGN', (0, 1), (-1, -1), 'LEFT'),  # Align left for the rest of the table
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
             ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ]))
 
-        # Apply color based on severity for the Risk Level column only
         for i, (level, _) in enumerate(summary.items(), start=1):
             bg_color = summary_severity_colors.get(level, colors.white)
             summary_table.setStyle(TableStyle([
                 ('BACKGROUND', (0, i), (0, i), bg_color),
             ]))
 
-        # Indent to align with the title
-        elements.append(Indenter(left=20))
         elements.append(summary_table)
-        elements.append(Indenter(left=-20))  # Reset indentation
         elements.append(Spacer(1, 24))
 
-        # Category Summary (Left Aligned with Title)
+        # Category Summary
         elements.append(Paragraph("Category Summary", sub2heading_style))
         data = [['Category', 'Number of Instances']] + [[category, str(count)] for category, count in category_summary.items()]
         category_table = Table(data, colWidths=[2 * inch, 1.5 * inch])
@@ -82,9 +66,7 @@ def generate_reportlab_pdf(site, summary, category_summary, detailed_results, fi
             ('GRID', (0, 0), (-1, -1), 1, colors.black),
         ]))
 
-        elements.append(Indenter(left=20))  # Indent category table
         elements.append(category_table)
-        elements.append(Indenter(left=-20))  # Reset indentation
         elements.append(Spacer(1, 24))
 
         # Detailed Alerts Organized by Category
@@ -95,21 +77,53 @@ def generate_reportlab_pdf(site, summary, category_summary, detailed_results, fi
 
         for result in detailed_results:
             category = result.get('type', 'Uncategorized')
+            endpoint_or_target = result.get('endpoint', result.get('target_ip', 'N/A'))
             vulnerabilities = result.get('vulnerabilities', [])
 
-            if vulnerabilities:
+            if category == 'Host Information':
                 elements.append(Paragraph(f"{category}", subheading_style))
-                data = [['Issue', 'Description', 'Severity', 'Endpoint']]
+                url = result['details'].get('URL', 'N/A')
+                elements.append(Paragraph(f"URL: {url}", normal_style))
+
+                # Add Headers Information
+                all_headers = result['details'].get('all_headers', {})
+                elements.append(Paragraph("All Headers:", subheading_style))
+                header_data = [[key, value] for key, value in all_headers.items()]
+                header_table = Table(header_data, colWidths=[2 * inch, 4 * inch])
+                header_table.setStyle(TableStyle([
+                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ]))
+                elements.append(header_table)
+                elements.append(Spacer(1, 12))
+
+                # Add Security Headers Information
+                sec_headers = result['details'].get('security_headers', {})
+                elements.append(Paragraph("Security Headers:", subheading_style))
+                sec_header_data = [[key, value['status'], value['severity'], value['description']] for key, value in sec_headers.items()]
+                sec_header_table = Table(sec_header_data, colWidths=[1.5 * inch, 1 * inch, 1 * inch, 3.5 * inch])
+                sec_header_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ]))
+                elements.append(sec_header_table)
+                elements.append(Spacer(1, 12))
+
+            elif vulnerabilities:
+                elements.append(Paragraph(f"{category} (Endpoint/IP: {endpoint_or_target})", subheading_style))
+                data = [['Issue', 'Description', 'Severity']]
 
                 for vuln in vulnerabilities:
                     issue = Paragraph(vuln.get('issue', 'N/A'), normal_style)
                     description = Paragraph(vuln.get('description', 'N/A'), normal_style)
                     severity = vuln.get('severity', 'N/A')
-                    endpoint = Paragraph(vuln.get('endpoint', 'N/A'), normal_style)
 
-                    data.append([issue, description, severity, endpoint])
+                    data.append([issue, description, severity])
 
-                alerts_table = Table(data, colWidths=[1.5 * inch, 2.5 * inch, 1 * inch, 2 * inch])
+                alerts_table = Table(data, colWidths=[1.5 * inch, 4 * inch, 1.5 * inch])
                 alerts_table.setStyle(TableStyle([
                     ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
                     ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
@@ -119,16 +133,13 @@ def generate_reportlab_pdf(site, summary, category_summary, detailed_results, fi
                     ('GRID', (0, 0), (-1, -1), 1, colors.black),
                 ]))
 
-                # Apply color based on severity for the Severity column in Alerts
                 for i, vuln in enumerate(vulnerabilities, start=1):
                     bg_color = severity_colors.get(vuln.get('severity', 'N/A'), colors.white)
                     alerts_table.setStyle(TableStyle([
                         ('BACKGROUND', (2, i), (2, i), bg_color),
                     ]))
 
-                elements.append(Indenter(left=20))  # Indent alert tables
                 elements.append(alerts_table)
-                elements.append(Indenter(left=-20))  # Reset indentation
                 elements.append(Spacer(1, 12))
 
         # Build the PDF

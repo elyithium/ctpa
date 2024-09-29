@@ -190,7 +190,7 @@ def scan_for_xxe_injection(url):
             if response.status_code == 200:
                 results.append({
                     "issue": "XML External Entity (XXE) Injection detected",
-                    "description": "Possible XXE vulnerability detected. Application may be processing untrusted XML data.",
+                    "description": f"Possible XXE vulnerability detected. Application may be processing untrusted XML data. Vulnerable Payload: {payload}",
                     "severity": "High"
                 })
         except requests.RequestException as reqexception:
@@ -224,7 +224,7 @@ def scan_for_tag_injection(url):
 
                 results.append({
                     "issue": "Tag Injection Vulnerability detected",
-                    "description": "Detected potential tag injection vulnerability. Application may be vulnerable to injecting arbitrary tags.",
+                    "description": f"Detected potential tag injection vulnerability. Application may be vulnerable to injecting arbitrary tags on payload: {payload}",
                     "severity": "Medium"
                 })
 
