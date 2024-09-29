@@ -10,7 +10,7 @@
 
 # production
 /build
-server/venv
+/server/venv
 server/__pycache__
 server/scanner/__pycache__
 
