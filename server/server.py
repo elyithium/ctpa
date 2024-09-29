@@ -1,7 +1,10 @@
 #main.py
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from scanner_engine.vulnerability_scanner import VulnerabilityScanner
+import os
+import json
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)  # This will allow your frontend to make requests to the backend
@@ -31,10 +34,54 @@ def scan():
     scanner = VulnerabilityScanner(base_url, endpoints, target_ip, target_url)
     scanner.run_scans()
     scanner.generate_report()
-    scanner.generate_pdf_report()
+
+    report_id, file_path = scanner.generate_pdf_report()
     results = scanner.results
 
-    return jsonify({"report": {"vulnerabilities": results}}), 200
+    report_data = {
+        "_id": report_id,
+        "vulnerabilities": scanner.results,
+        "target": target_url,
+        "createdAt": datetime.now().strftime('%a, %d %b %Y %H:%M:%S')
+    }
+
+    # Save the JSON report
+    json_file_path = f"reports/vulnerability_report_{report_id}.json"
+    with open(json_file_path, 'w') as json_file:
+        json.dump(report_data, json_file)
+
+    return jsonify({"report": report_data}), 200
+
+
+@app.route('/api/report_data/<report_id>', methods=['GET'])
+def get_report_data(report_id):
+    try:
+        file_path = f"reports/vulnerability_report_{report_id}.json"
+
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as file:
+                report_data = json.load(file)
+            return jsonify({"report": report_data}), 200
+        else:
+            return jsonify({"error": "Report data not found"}), 404
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/reports/<report_id>', methods=['GET'])
+def get_report(report_id):
+    try:
+        # Assuming the report files are stored with the report ID as the filename
+        file_path = f"reports/vulnerability_report_{report_id}.pdf"
+        if os.path.exists(file_path):
+            return send_file(file_path, as_attachment=True)
+        else:
+            return jsonify({"error": "Report not found"}), 404
+    except FileNotFoundError:
+        return jsonify({"error": "Report not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=5000)

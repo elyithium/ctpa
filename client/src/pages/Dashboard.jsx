@@ -43,13 +43,15 @@ const Dashboard = () => {
 
         setLoading(true);
         try {
-            const response = await api.post('/api/scan', { target: url });
+            const response = await api.post('/api/scan', { target: url }, {timeout: 120000});
             const reportId = response.data.report._id;
-            //console.log(reportId);
-            localStorage.setItem('latestReportId', reportId);
-			localStorage.setItem('scanResults', JSON.stringify(response.data.report.vulnerabilities));
-			setOpenSnackbar(true);
-            navigate('/Reports/Reports');
+
+			if (reportId) {
+            	localStorage.setItem('latestReportId', reportId);
+            	navigate('/Reports/Reports');
+			}  else {
+				setShowErrorAlert('Failed to obtain report ID. Please try again.');
+			}
         } catch (error) {
             console.error('Error during scan:', error);
             setShowErrorAlert('An error occurred during the scan. Please try again.');
