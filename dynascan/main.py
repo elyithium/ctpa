@@ -13,6 +13,7 @@ if __name__ == "__main__":
         "WebGoat/AccessControl/attack": {},
         "WebGoat/login": {},
         "WebGoat/CSRF": {},
+        "WebGoat/SSRF": {},
         "WebGoat/InsecureDeserialization/attack": {"serialized_data": ""},
         "WebGoat/SerializationBasics/attack": {"input": ""}
     }
