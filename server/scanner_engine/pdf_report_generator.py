@@ -3,7 +3,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
 
 def generate_reportlab_pdf(site, summary, category_summary, detailed_results, file_path='./reports/vulnerability_report.pdf'):
     try:
@@ -24,14 +24,17 @@ def generate_reportlab_pdf(site, summary, category_summary, detailed_results, fi
         elements.append(Spacer(1, 12))
 
         # Site and Date Info (as Heading3)
-        elements.append(Paragraph(f"Site: {site}", subheading_style))
+        elements.append(Paragraph(f"Site: {site}", heading_style))
         elements.append(Paragraph(f"Generated on: {datetime.now().strftime('%a, %d %b %Y %H:%M:%S')}", sub2heading_style))
         elements.append(Spacer(1, 12))
 
         # Summary of Alerts
-        elements.append(Paragraph("Summary of Alerts", sub2heading_style))
-        data = [['Risk Level', 'Number of Alerts']] + [[level, str(count)] for level, count in summary.items()]
-        summary_table = Table(data, colWidths=[2 * inch, 1.5 * inch])
+        elements.append(Paragraph("Summary of Alerts", subheading_style))
+        data = [[Paragraph('Risk Level', normal_style), Paragraph('Number of Alerts', normal_style)]]
+        for level, count in summary.items():
+            data.append([Paragraph(level, normal_style), Paragraph(str(count), normal_style)])
+
+        summary_table = Table(data, colWidths=[2 * inch, 1.5 * inch], hAlign='LEFT')
 
         summary_severity_colors = {'High': colors.red, 'Medium': colors.orange, 'Low': colors.yellow, 'Informational': colors.blue}
         summary_table.setStyle(TableStyle([
@@ -53,9 +56,12 @@ def generate_reportlab_pdf(site, summary, category_summary, detailed_results, fi
         elements.append(Spacer(1, 24))
 
         # Category Summary
-        elements.append(Paragraph("Category Summary", sub2heading_style))
-        data = [['Category', 'Number of Instances']] + [[category, str(count)] for category, count in category_summary.items()]
-        category_table = Table(data, colWidths=[2 * inch, 1.5 * inch])
+        elements.append(Paragraph("Category Summary", subheading_style))
+        data = [[Paragraph('Category', normal_style), Paragraph('Number of Instances', normal_style)]]
+        for category, count in category_summary.items():
+            data.append([Paragraph(category, normal_style), Paragraph(str(count), normal_style)])
+
+        category_table = Table(data, colWidths=[2 * inch, 1.5 * inch], hAlign='LEFT')
 
         category_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
@@ -68,9 +74,8 @@ def generate_reportlab_pdf(site, summary, category_summary, detailed_results, fi
 
         elements.append(category_table)
         elements.append(Spacer(1, 24))
-
+        elements.append(PageBreak())
         # Detailed Alerts Organized by Category
-        elements.append(Paragraph("Alerts Organized by Category", sub2heading_style))
 
         # Severity color definitions for alerts
         severity_colors = {'High': colors.red, 'Medium': colors.orange, 'Low': colors.yellow, 'Informational': colors.blue}
@@ -81,15 +86,11 @@ def generate_reportlab_pdf(site, summary, category_summary, detailed_results, fi
             vulnerabilities = result.get('vulnerabilities', [])
 
             if category == 'Host Information':
-                elements.append(Paragraph(f"{category}", subheading_style))
-                url = result['details'].get('URL', 'N/A')
-                elements.append(Paragraph(f"URL: {url}", normal_style))
-
                 # Add Headers Information
                 all_headers = result['details'].get('all_headers', {})
                 elements.append(Paragraph("All Headers:", subheading_style))
-                header_data = [[key, value] for key, value in all_headers.items()]
-                header_table = Table(header_data, colWidths=[2 * inch, 4 * inch])
+                header_data = [[Paragraph(key, normal_style), Paragraph(value, normal_style)] for key, value in all_headers.items()]
+                header_table = Table(header_data, colWidths=[2 * inch, 4 * inch], hAlign='LEFT')
                 header_table.setStyle(TableStyle([
                     ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
                     ('GRID', (0, 0), (-1, -1), 1, colors.black),
@@ -100,8 +101,8 @@ def generate_reportlab_pdf(site, summary, category_summary, detailed_results, fi
                 # Add Security Headers Information
                 sec_headers = result['details'].get('security_headers', {})
                 elements.append(Paragraph("Security Headers:", subheading_style))
-                sec_header_data = [[key, value['status'], value['severity'], value['description']] for key, value in sec_headers.items()]
-                sec_header_table = Table(sec_header_data, colWidths=[1.5 * inch, 1 * inch, 1 * inch, 3.5 * inch])
+                sec_header_data = [[Paragraph(key, normal_style), Paragraph(value['status'], normal_style), Paragraph(value['severity'], normal_style), Paragraph(value['description'], normal_style)] for key, value in sec_headers.items()]
+                sec_header_table = Table(sec_header_data, colWidths=[1.9 * inch, 0.8 * inch, 0.8 * inch, 3.5 * inch])
                 sec_header_table.setStyle(TableStyle([
                     ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
                     ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
@@ -112,9 +113,86 @@ def generate_reportlab_pdf(site, summary, category_summary, detailed_results, fi
                 elements.append(sec_header_table)
                 elements.append(Spacer(1, 12))
 
+
+            # Handle Open Ports separately
+            elif category == 'Open Ports':
+                elements.append(Paragraph(f"{category}<br/>Endpoint/IP: {endpoint_or_target}", subheading_style))
+                port_data = [[Paragraph('Port', normal_style), Paragraph('Issue', normal_style), Paragraph('Description', normal_style), Paragraph('Severity', normal_style)]]
+
+                for port_info in vulnerabilities:
+                    port = Paragraph(str(port_info['port']), normal_style)
+                    for vuln in port_info.get('vulnerabilities', []):
+                        issue = Paragraph(vuln.get('issue', 'N/A'), normal_style)
+                        description = Paragraph(vuln.get('description', 'N/A'), normal_style)
+                        severity = vuln.get('severity', 'N/A')
+
+                        port_data.append([port, issue, description, severity])
+
+                port_table = Table(port_data, colWidths=[1 * inch, 1.5 * inch, 3 * inch, 1.5 * inch])
+                port_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ]))
+
+
+                row_index = 1
+                for port_info in vulnerabilities:
+                    for vuln in port_info.get('vulnerabilities', []):
+                        bg_color = severity_colors.get(vuln.get('severity', 'N/A'), colors.white)
+                        port_table.setStyle(TableStyle([
+                            ('BACKGROUND', (3, row_index), (3, row_index), bg_color),
+                        ]))
+                        row_index += 1
+
+
+                elements.append(port_table)
+
+            elif category == "Cryptographic Failures Within Endpoint":
+                elements.append(Paragraph(f"{category}<br/>Endpoint/IP: {endpoint_or_target}", subheading_style))
+                data = [[Paragraph('Issue', normal_style), Paragraph('Description', normal_style), Paragraph('Severity', normal_style), Paragraph('Details', normal_style)]]
+
+                for vuln in vulnerabilities:
+                    issue = Paragraph(vuln.get('issue', 'N/A'), normal_style)
+                    description = Paragraph(vuln.get('description', 'N/A'), normal_style)
+                    severity = vuln.get('severity', 'N/A')
+
+                    # Check if details is a dictionary, and convert it to a string or use 'N/A'
+                    details_value = vuln.get('details', 'N/A')
+                    if isinstance(details_value, dict):
+                        details_str = ', '.join([f"{k}: {v}" for k, v in details_value.items()])
+                    else:
+                        details_str = details_value
+
+                    details = Paragraph(details_str, normal_style)
+
+                    data.append([issue, description, severity, details])
+
+                alerts_table = Table(data, colWidths=[1 * inch, 1.5 * inch, 3 * inch, 1.5 * inch])
+                alerts_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ]))
+
+                for i, vuln in enumerate(vulnerabilities, start=1):
+                    bg_color = severity_colors.get(vuln.get('severity', 'N/A'), colors.white)
+                    alerts_table.setStyle(TableStyle([
+                        ('BACKGROUND', (2, i), (2, i), bg_color),
+                    ]))
+
+                elements.append(alerts_table)
+                elements.append(Spacer(1, 12))
+
             elif vulnerabilities:
-                elements.append(Paragraph(f"{category} (Endpoint/IP: {endpoint_or_target})", subheading_style))
-                data = [['Issue', 'Description', 'Severity']]
+                elements.append(Paragraph(f"{category}<br/>Endpoint/IP: {endpoint_or_target}", subheading_style))
+                data = [[Paragraph('Issue', normal_style), Paragraph('Description', normal_style), Paragraph('Severity', normal_style)]]
 
                 for vuln in vulnerabilities:
                     issue = Paragraph(vuln.get('issue', 'N/A'), normal_style)
@@ -141,6 +219,7 @@ def generate_reportlab_pdf(site, summary, category_summary, detailed_results, fi
 
                 elements.append(alerts_table)
                 elements.append(Spacer(1, 12))
+
 
         # Build the PDF
         doc.build(elements)

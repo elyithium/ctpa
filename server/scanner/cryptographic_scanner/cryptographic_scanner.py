@@ -3,7 +3,6 @@ import socket
 import requests
 from urllib.parse import urlparse
 
-from .domain_checks.protocol_check import check_security_defaults
 from .domain_checks import (
     check_security_defaults,
     check_protocol_certificate,
@@ -170,7 +169,7 @@ def split_cipher_suite(cipher_suite):
     authentication_algorithms = ['RSA', 'ECDSA', 'DSA']
     encryption_algorithms = ['AES', 'DES', 'ChaCha20', 'RC4']
     modes_of_operation = ['GCM', 'CBC', 'CCM']
-    hash_algorithm = ['SHA256', 'SHA384', 'SHA512', 'MD5']
+    hash_algorithms = ['SHA256', 'SHA384', 'SHA512', 'MD5']
 
     # Step 3: Parse the cipher suite
     for part in parts:
@@ -187,7 +186,7 @@ def split_cipher_suite(cipher_suite):
         elif part in modes_of_operation and mode_of_operation is None:
             mode_of_operation = part
         # Check for MAC algorithm
-        elif part in hash_algorithm and hash_algorithm is None:
+        elif part in hash_algorithms and hash_algorithm is None:
             hash_algorithm = part
 
     # Handle cases where encryption_algorithm is missing (e.g., ECDHE-RSA-GCM-SHA256)

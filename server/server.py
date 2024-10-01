@@ -73,7 +73,7 @@ def get_report_data(report_id):
 def get_report(report_id):
     try:
         # Assuming the report files are stored with the report ID as the filename
-        file_path = f"reports/vulnerability_report_{report_id}.pdf"
+        file_path = f"./reports/{report_id}"
         if os.path.exists(file_path):
             return send_file(file_path, as_attachment=True)
         else:
