@@ -13,8 +13,11 @@ CORS(app)  # This will allow your frontend to make requests to the backend
 def scan():
     data = request.json
     target_url = data.get('target')
+    scanner_type = data.get('scannerType')
+
     if not target_url:
         return jsonify({"error": "No target URL provided"}), 400
+
 
     endpoints = {
         "WebGoat/SqlInjectionAdvanced/lesson1": {"last_name": ""},
@@ -28,15 +31,30 @@ def scan():
         "WebGoat/login": {},
         "WebGoat/CSRF": {}
     }
+
     base_url = target_url  # Using target_url as base_url
     target_ip = "127.0.0.1"  # Use actual IP based on the scan target
 
     scanner = VulnerabilityScanner(base_url, endpoints, target_ip, target_url)
-    scanner.run_scans()
-    scanner.generate_report()
+
+    if scanner_type == 'Full Scan':
+        scanner.run_scans(scan_type='Full Scan')
+    elif scanner_type == 'Broken Access Control':
+        scanner.run_scans(scan_type='Broken Access Control')
+    elif scanner_type == 'Injection':
+        scanner.run_scans(scan_type='Injection')
+    elif scanner_type == 'Cryptographic Failures':
+        scanner.run_scans(scan_type='Cryptographic Failures')
+    elif scanner_type == 'Security Misconfiguration':
+        scanner.run_scans(scan_type='Security Misconfiguration')
+    elif scanner_type == 'Reconnaissance':
+        scanner.run_scans(scan_type='Reconnaissance')
+    else:
+        return jsonify({"error": "Invalid scanner type"}), 400
+
+    scanner.generate_console_report()
 
     report_id, file_path = scanner.generate_pdf_report()
-    results = scanner.results
 
     report_data = {
         "_id": report_id,
