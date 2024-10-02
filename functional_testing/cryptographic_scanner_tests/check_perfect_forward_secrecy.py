@@ -1,5 +1,5 @@
 import unittest
-from server.scanner.cryptographic_scanner.domain_checks.check_perfect_forward_secrecy import check_perfect_forward_secrecy
+from ...server.scanner.cryptographic_scanner.domain_checks.check_perfect_forward_secrecy import check_perfect_forward_secrecy
 
 class TestCheckPerfectForwardSecrecy(unittest.TestCase):
 

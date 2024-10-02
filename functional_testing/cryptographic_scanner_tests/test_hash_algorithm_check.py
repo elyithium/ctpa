@@ -1,5 +1,5 @@
 import unittest
-from server.scanner.cryptographic_scanner.domain_checks.hash_algorithm_check import check_hash_algorithm
+from ...server.scanner.cryptographic_scanner.domain_checks.hash_algorithm_check import check_hash_algorithm
 
 class TestHashAlgorithmCheck(unittest.TestCase):
 

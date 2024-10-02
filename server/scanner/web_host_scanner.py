@@ -51,7 +51,9 @@ def scan_web_host_info(url):
             if header in headers:
                 host_info["security_headers"][header] = {
                     "status": "Present",
-                    "value": headers[header]
+                    "value": headers[header],
+                    "severity": info["severity"],
+                    "description": info["description"]
                 }
             else:
                 host_info["security_headers"][header] = {

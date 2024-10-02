@@ -1,5 +1,5 @@
 import unittest
-from server.scanner.cryptographic_scanner.endpoint_checks.check_message_integrity_and_signatures import check_message_integrity_and_signatures
+from ...server.scanner.cryptographic_scanner.endpoint_checks.check_message_integrity_and_signatures import check_message_integrity_and_signatures
 
 class TestCheckMessageIntegrity(unittest.TestCase):
 

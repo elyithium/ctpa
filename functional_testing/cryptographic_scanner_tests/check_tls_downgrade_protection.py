@@ -1,5 +1,5 @@
 import unittest
-from server.scanner.cryptographic_scanner.domain_checks.check_tls_downgrade_protection import check_tls_downgrade_protection
+from ...server.scanner.cryptographic_scanner.domain_checks.check_tls_downgrade_protection import check_tls_downgrade_protection
 
 class TestCheckTLSDowngradeProtection(unittest.TestCase):
 

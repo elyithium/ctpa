@@ -1,5 +1,5 @@
 import unittest
-from server.scanner.cryptographic_scanner.endpoint_checks.check_encoding_usage import check_encoding_usage
+from ...server.scanner.cryptographic_scanner.endpoint_checks.check_encoding_usage import check_encoding_usage
 
 class TestCheckEncodingUsage(unittest.TestCase):
 

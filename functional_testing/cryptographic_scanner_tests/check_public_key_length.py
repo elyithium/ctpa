@@ -1,5 +1,5 @@
 import unittest
-from server.scanner.cryptographic_scanner.domain_checks.check_public_key_length import check_public_key_length
+from ...server.scanner.cryptographic_scanner.domain_checks.check_public_key_length import check_public_key_length
 
 class TestCheckPublicKeyLength(unittest.TestCase):
 

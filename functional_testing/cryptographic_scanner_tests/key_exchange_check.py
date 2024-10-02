@@ -1,5 +1,5 @@
 import unittest
-from server.scanner.cryptographic_scanner.domain_checks.key_exchange_check import key_exchange_check
+from ...server.scanner.cryptographic_scanner.domain_checks.key_exchange_check import key_exchange_check
 
 class TestKeyExchangeCheck(unittest.TestCase):
 

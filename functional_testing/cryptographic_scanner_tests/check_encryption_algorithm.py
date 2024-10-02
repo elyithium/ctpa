@@ -1,5 +1,5 @@
 import unittest
-from server.scanner.cryptographic_scanner.domain_checks.check_encryption_algorithm import check_encryption_algorithm
+from ...server.scanner.cryptographic_scanner.domain_checks.check_encryption_algorithm import check_encryption_algorithm
 
 class TestCheckEncryptionAlgorithm(unittest.TestCase):
 

@@ -101,7 +101,24 @@ def generate_reportlab_pdf(site, summary, category_summary, detailed_results, fi
                 # Add Security Headers Information
                 sec_headers = result['details'].get('security_headers', {})
                 elements.append(Paragraph("Security Headers:", subheading_style))
-                sec_header_data = [[Paragraph(key, normal_style), Paragraph(value['status'], normal_style), Paragraph(value['severity'], normal_style), Paragraph(value['description'], normal_style)] for key, value in sec_headers.items()]
+
+                # Define column headers separately
+                sec_header_data = [[
+                    Paragraph('Header', normal_style),
+                    Paragraph('Status', normal_style),
+                    Paragraph('Severity', normal_style),
+                    Paragraph('Description', normal_style)
+                ]]
+
+				# Add the data rows
+                for key, value in sec_headers.items():
+                    sec_header_data.append([
+                        Paragraph(key, normal_style),
+                        Paragraph(value.get('status', 'N/A'), normal_style),
+                        Paragraph(value.get('severity', 'N/A'), normal_style),
+                        Paragraph(value.get('description', 'N/A'), normal_style)
+                    ])
+
                 sec_header_table = Table(sec_header_data, colWidths=[1.9 * inch, 0.8 * inch, 0.8 * inch, 3.5 * inch])
                 sec_header_table.setStyle(TableStyle([
                     ('BACKGROUND', (0, 0), (-1, 0), colors.grey),

@@ -1,5 +1,3 @@
-import OpenSSL
-
 def check_public_key_length(key_size, domain):
     try:
         # Check the key length (2048 bits or higher is considered secure)

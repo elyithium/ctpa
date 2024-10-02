@@ -1,5 +1,5 @@
 import unittest
-from server.scanner.cryptographic_scanner.domain_checks.check_authentication_algorithm import check_authentication_algorithm
+from ...server.scanner.cryptographic_scanner.domain_checks.check_authentication_algorithm import check_authentication_algorithm
 
 class TestCheckAuthenticationAlgorithm(unittest.TestCase):
 
