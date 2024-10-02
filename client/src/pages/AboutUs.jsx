@@ -28,12 +28,12 @@ const StyledTableCell = styled(TableCell)({
 
 // Sample data for the table
 const teamMembers = [
-	{ handle: 'DynaLead', name: 'Yashvir Chaudhary', contact: 'yashchaudhary@student.swin.edu.au', role: 'Team Leader' },
-	{ handle: 'DynaDesign', name: 'Gurjodh Thukral', contact: 'gthukral@student.swin.edu.au', role: 'Security Architect' },
-	{ handle: 'Kartik2123', name: 'Kartikeya Gupta', contact: 'kartikeya@student.swin.edu.au', role: 'Developer and Proofreading' },
-	{ handle: 'Anuj2022', name: 'Anuj Kumar', contact: 'anuj.kumar@student.swin.edu.au', role: 'UI/UX Developer' },
-	{ handle: 'Mohammed.ali', name: 'Mohammed Ali', contact: 'mohammed.ali@student.swin.edu.au', role: 'Security Architect' },
-	{ handle: 'Jones-4113', name: 'Ali Mohamadi Jokar', contact: 'jokarali@student.swin.edu.au', role: 'Risk Assessor' },
+	{ handle: 'Yashvi-gif', name: 'Yashvi Chaudhary', contact: '103174005@student.swin.edu.au', role: 'Team Leader' },
+	{ handle: 'Corebenyo', name: 'Corbyn Tunks', contact: '103672839@student.swin.edu.au', role: 'Security Architect' },
+	{ handle: 'knahid603', name: 'Md Nahid Khan', contact: '102839154@student.swin.edu.au', role: 'Developer and Proofreading' },
+	{ handle: 'Aruro69', name: 'Md Araf Uddin', contact: '103485354@student.swin.edu.au', role: 'UI/UX Developer' },
+	{ handle: 'hassanuzzaman-sut', name: 'Mohammad Hassanuzzaman', contact: '103820955@student.swin.edu.au', role: 'Security Architect' },
+	{ handle: 'jobaer4810', name: 'Ali Mohammad Jobaer', contact: '103835483@student.swin.edu.au', role: 'Risk Assessor' },
 ];
 
 const TeamPage = () => {
