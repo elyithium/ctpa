@@ -2,7 +2,7 @@ import ssl
 import socket
 
 # Check TLS Downgrade Protection (Fallback SCSV)
-def check_tls_downgrade_protection(domain):
+def check_tls_downgrade_protection(domain="N/A"):
     try:
         # Create a context with modern TLS protocols
         context = ssl.SSLContext(ssl.PROTOCOL_TLS)  # Modern TLS protocols (TLS 1.2 and TLS 1.3)

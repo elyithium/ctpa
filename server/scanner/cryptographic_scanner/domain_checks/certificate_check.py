@@ -1,8 +1,7 @@
-import OpenSSL
 from datetime import datetime
 
 # Check for Expired Certificates
-def check_protocol_certificate(cert, domain):
+def check_protocol_certificate(cert, domain="N/A"):
     try:
         # Get the 'notAfter' date from the certificate object (decoded)
         not_after = cert.get_notAfter().decode('ascii')

@@ -1,4 +1,4 @@
-def check_authentication_algorithm(auth_algo, domain):
+def check_authentication_algorithm(auth_algo, domain="N/A"):
     if auth_algo == 'RSA':
         return {
             "issue": "Weak Authentication Algorithm",

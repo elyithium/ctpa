@@ -1,4 +1,4 @@
-def check_public_key_length(key_size, domain):
+def check_public_key_length(key_size, domain="N/A"):
     try:
         # Check the key length (2048 bits or higher is considered secure)
         if key_size >= 2048:

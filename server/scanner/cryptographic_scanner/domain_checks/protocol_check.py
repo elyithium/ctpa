@@ -1,5 +1,5 @@
 # Check for security defaults TLS/SSL
-def check_security_defaults(protocol_version, domain):
+def check_security_defaults(protocol_version, domain="N/A"):
     secure_protocols = ['TLSv1.2', 'TLSv1.3']
     deprecated_protocols = ['SSLv2', 'SSLv3', 'TLSv1.0', 'TLSv1.1']
 

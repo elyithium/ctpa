@@ -1,5 +1,5 @@
 # Check for Strong or Weak Message Authentication Code (MAC) Algorithms
-def check_hash_algorithm(hash_algo, domain):
+def check_hash_algorithm(hash_algo, domain="N/A"):
     if 'SHA256' in hash_algo or 'SHA384' in hash_algo:
         return {
             "issue": "Strong MAC Algorithm",

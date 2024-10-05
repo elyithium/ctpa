@@ -1,5 +1,5 @@
 # Check for Strong or Weak Encryption Algorithms
-def check_encryption_algorithm(encryption_algo, domain):
+def check_encryption_algorithm(encryption_algo, domain="N/A"):
     if 'AES' in encryption_algo or 'ChaCha20' in encryption_algo:
         return {
             "issue": "Encryption",

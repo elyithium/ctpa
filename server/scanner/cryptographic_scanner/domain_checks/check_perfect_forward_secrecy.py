@@ -1,5 +1,5 @@
 #forward secrecy check
-def check_perfect_forward_secrecy(cipher, domain):
+def check_perfect_forward_secrecy(cipher, domain="N/A"):
     if 'ECDHE' in cipher or 'DHE' in cipher:
         return {
             "issue": "Perfect Forward Secrecy",

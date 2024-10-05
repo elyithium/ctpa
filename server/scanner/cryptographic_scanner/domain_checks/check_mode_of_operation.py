@@ -1,4 +1,4 @@
-def check_mode_of_operation(mode_of_operation, domain):
+def check_mode_of_operation(mode_of_operation, domain="N/A"):
     if mode_of_operation == 'ECB':
         return {
             "issue": "Weak Mode of Operation",

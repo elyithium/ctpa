@@ -1,5 +1,5 @@
 # Check key exchange
-def check_key_exchange(key_exchange_algo, domain):
+def check_key_exchange(key_exchange_algo, domain="N/A"):
     if 'RSA' in key_exchange_algo:
         return {
             "issue": "Weak Key Exchange Algorithm",
