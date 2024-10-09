@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { act } from 'react';
 import '@testing-library/jest-dom/extend-expect';
 import Reports from '../pages/Reports'; // Adjust the import based on your structure
 

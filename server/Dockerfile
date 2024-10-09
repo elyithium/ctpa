@@ -3,14 +3,14 @@ FROM python:3.9-slim
 
 # Set the working directory in the container
 WORKDIR /app
-
-# Copy the current directory contents into the container at /app
 COPY . /app
+# Copy the current directory contents into the container at /app
 
-# Install required Python packages
-RUN pip install requests
-RUN pip install colorama
-RUN pip install pyOpenSSl
+RUN pip install -r requirements.txt
 
+
+EXPOSE 5000
+
+ENV PYTHONNUNBUFFRED=1
 # Run vulnerability scanner script when the container launches
-CMD ["python", "main.py"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "server:app"]
