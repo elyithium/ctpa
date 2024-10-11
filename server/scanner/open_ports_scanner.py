@@ -56,17 +56,22 @@ def scan_open_ports(target, ports):
             result = sock.connect_ex((target, port))
             if result == 0:
                 # If the port is open, check for known vulnerabilities
-                port_vulns = port_vulnerabilities.get(port, [{
-                    "issue": "Unknown Issues",
-                    "description": f"No specific vulnerabilities known for port {port}.",
-                    "severity": "Informational"
-                }])
+                port_vulns = port_vulnerabilities.get(port)
 
-                # Add each vulnerability to the list
-                open_ports.append({
-                    "port": port,
-                    "vulnerabilities": port_vulns
-                })
+                if port_vulns:
+                    open_ports.append({
+                        "port": port,
+                        "vulnerabilities": port_vulns
+                    })
+                else:
+                    open_ports.append({
+                        "port": port,
+                        "vulnerabilities": [{
+                            "issue": "Unknown Issues",
+                            "description": f"No specific vulnerabilities known for port {port}.",
+                            "severity": "Informational"
+                        }]
+                    })
 
             sock.close()
         except Exception as e:

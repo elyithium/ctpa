@@ -51,7 +51,7 @@ const Dashboard = () => {
 		setScanPhase('Starting Scan...');
 
 		try {
-			setScanPhase('Scanning Headers...');
+			setScanPhase('Scanning Endpoints...');
 			const response = await api.post('/api/scan', { target: url, scannerType }, { timeout: 120000 });
 
 			const reportId = response.data.report._id;
@@ -133,6 +133,8 @@ const Dashboard = () => {
 							<MenuItem value="Injection">Injection</MenuItem>
 							<MenuItem value="Cryptographic Failures">Cryptographic Failures</MenuItem>
 							<MenuItem value="Security Misconfiguration">Security Misconfiguration</MenuItem>
+							<MenuItem value="Server-Side Request Forgery">Server-Side Request Forgery</MenuItem>
+							<MenuItem value="Insecure Deserialization">Insecure Deserialization</MenuItem>
 							<MenuItem value="Reconnaissance">Reconnaissance</MenuItem>
 						</Select>
 					</FormControl>

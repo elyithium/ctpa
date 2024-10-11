@@ -168,9 +168,9 @@ def generate_reportlab_pdf(site, summary, category_summary, detailed_results, fi
 
                 elements.append(port_table)
 
-            elif category == "Cryptographic Failures Within Endpoint":
+            elif category == "SSRF":
                 elements.append(Paragraph(f"{category}<br/>Endpoint/IP: {endpoint_or_target}", subheading_style))
-                data = [[Paragraph('Issue', normal_style), Paragraph('Description', normal_style), Paragraph('Severity', normal_style), Paragraph('Details', normal_style)]]
+                data = [[Paragraph('Issue', normal_style), Paragraph('Description', normal_style), Paragraph('Details', normal_style), Paragraph('Severity', normal_style)]]
 
                 for vuln in vulnerabilities:
                     issue = Paragraph(vuln.get('issue', 'N/A'), normal_style)
@@ -186,9 +186,9 @@ def generate_reportlab_pdf(site, summary, category_summary, detailed_results, fi
 
                     details = Paragraph(details_str, normal_style)
 
-                    data.append([issue, description, severity, details])
+                    data.append([issue, description, details, severity])
 
-                alerts_table = Table(data, colWidths=[1 * inch, 1.5 * inch, 3 * inch, 1.5 * inch])
+                alerts_table = Table(data, colWidths=[1 * inch, 2.5 * inch, 2 * inch, 1.5 * inch])
                 alerts_table.setStyle(TableStyle([
                     ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
                     ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
@@ -201,7 +201,46 @@ def generate_reportlab_pdf(site, summary, category_summary, detailed_results, fi
                 for i, vuln in enumerate(vulnerabilities, start=1):
                     bg_color = severity_colors.get(vuln.get('severity', 'N/A'), colors.white)
                     alerts_table.setStyle(TableStyle([
-                        ('BACKGROUND', (2, i), (2, i), bg_color),
+                        ('BACKGROUND', (3, i), (3, i), bg_color),
+                    ]))
+
+                elements.append(alerts_table)
+                elements.append(Spacer(1, 12))
+
+            elif category == "Cryptographic Failures Within Endpoint":
+                elements.append(Paragraph(f"{category}<br/>Endpoint/IP: {endpoint_or_target}", subheading_style))
+                data = [[Paragraph('Issue', normal_style), Paragraph('Description', normal_style), Paragraph('Details', normal_style), Paragraph('Severity', normal_style)]]
+
+                for vuln in vulnerabilities:
+                    issue = Paragraph(vuln.get('issue', 'N/A'), normal_style)
+                    description = Paragraph(vuln.get('description', 'N/A'), normal_style)
+                    severity = vuln.get('severity', 'N/A')
+
+                    # Check if details is a dictionary, and convert it to a string or use 'N/A'
+                    details_value = vuln.get('details', 'N/A')
+                    if isinstance(details_value, dict):
+                        details_str = ', '.join([f"{k}: {v}" for k, v in details_value.items()])
+                    else:
+                        details_str = details_value
+
+                    details = Paragraph(details_str, normal_style)
+
+                    data.append([issue, description, details, severity])
+
+                alerts_table = Table(data, colWidths=[1 * inch, 2.5 * inch, 2 * inch, 1.5 * inch])
+                alerts_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ]))
+
+                for i, vuln in enumerate(vulnerabilities, start=1):
+                    bg_color = severity_colors.get(vuln.get('severity', 'N/A'), colors.white)
+                    alerts_table.setStyle(TableStyle([
+                        ('BACKGROUND', (3, i), (3, i), bg_color),
                     ]))
 
                 elements.append(alerts_table)

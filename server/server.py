@@ -20,6 +20,7 @@ def scan():
 
 
     endpoints = {
+        "WebGoat/SqlInjection/attack": {"last_name": ""},
         "WebGoat/SqlInjectionAdvanced/lesson1": {"last_name": ""},
         "WebGoat/SqlInjectionAdvanced/lesson2": {"last_name": ""},
         "WebGoat/SqlInjectionAdvanced/lesson3": {"last_name": ""},
@@ -29,7 +30,10 @@ def scan():
         "WebGoat/SensitiveData": {},
         "WebGoat/AccessControl/attack": {},
         "WebGoat/login": {},
-        "WebGoat/CSRF": {}
+        "WebGoat/CSRF": {},
+        "WebGoat/SSRF": {},
+        "WebGoat/InsecureDeserialization/attack": {"serialized_data": ""},
+        "WebGoat/SerializationBasics/attack": {"input": ""}
     }
 
     base_url = target_url  # Using target_url as base_url
@@ -47,6 +51,10 @@ def scan():
         scanner.run_scans(scan_type='Cryptographic Failures')
     elif scanner_type == 'Security Misconfiguration':
         scanner.run_scans(scan_type='Security Misconfiguration')
+    elif scanner_type == 'Server-Side Request Forgery':
+        scanner.run_scans(scan_type='Server-Side Request Forgery')
+    elif scanner_type == 'Insecure Deserialization':
+        scanner.run_scans(scan_type='Insecure Deserialization')
     elif scanner_type == 'Reconnaissance':
         scanner.run_scans(scan_type='Reconnaissance')
     else:

