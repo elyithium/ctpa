@@ -33,7 +33,7 @@ def scan():
     }
 
     base_url = target_url  # Using target_url as base_url
-    target_ip = "127.0.0.1"  # Use actual IP based on the scan target
+    target_ip = "webgoat"  # Use actual IP based on the scan target
 
     scanner = VulnerabilityScanner(base_url, endpoints, target_ip, target_url)
 
