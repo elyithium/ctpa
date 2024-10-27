@@ -1,0 +1,12 @@
+<users><user><username>admin</username><password>12345</password></user></users>
+<users><user><username>admin</username><password>12345<!--<mail>admin@example.com</mail>--></password></user></users>
+<users><user><username>john</username><password><script>alert('Tag Injection')</script></password></user></users>
+<users><user><username>john</username><password admin='true'>12345</password></user></users>
+<users><user><username>john</username><password>12345</password><invalidtag></user></users>
+<users><user><username>&ext;</username><password>12345</password></user></users>
+<users><user><username>john</username><password><admin>yes</admin>12345</password></user></users>
+<users><user><username>john</username><password>12345<password></user></users>
+<users><user><username>john</username><password><details><admin>1</admin></details>12345</password></user></users>
+<users><user><username>&#x27; OR &#x27;&#x3C;script&#x3E;alert(1)&#x3C;/script&#x3E;</username><password>12345</password></user></users>
+<users><user><username>admin</username><password><!-- Comment injection --></password></user></users>
+<users><user><username>john</username><password><h1>Admin</h1></password></user></users>
